@@ -21,12 +21,12 @@ namespace Core.Repositories
 
         public Stop GetStop(int stopId)
         {
-            return _dbContext.Set<Stop>().Find(stopId);
+            return _dbContext.Stops.Find(stopId);
         }
 
         public IEnumerable<Stop> GetAllStops()
         {
-            return _dbContext.Set<Stop>().ToList();
+            return _dbContext.Stops.ToList();
         }
 
         public Stop UpdateStop(Stop stop)
@@ -38,10 +38,10 @@ namespace Core.Repositories
 
         public void DeleteStop(int stopId)
         {
-            Stop stop = _dbContext.Set<Stop>().Find(stopId);
+            Stop stop = _dbContext.Stops.Find(stopId);
             if (stop != null)
             {
-                _dbContext.Set<Stop>().Remove(stop);
+                _dbContext.Stops.Remove(stop);
                 _dbContext.SaveChanges();
             }
         }

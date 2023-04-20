@@ -21,12 +21,12 @@ namespace Core.Repositories
 
         public Route GetRoute(int routeId)
         {
-            return _dbContext.Set<Route>().Find(routeId);
+            return _dbContext.Routes.Find(routeId);
         }
 
         public IEnumerable<Route> GetAllRoutes()
         {
-            return _dbContext.Set<Route>().ToList();
+            return _dbContext.Routes.ToList();
         }
 
         public Route UpdateRoute(Route route)
@@ -38,10 +38,10 @@ namespace Core.Repositories
 
         public void DeleteRoute(int routeId)
         {
-            Route route = _dbContext.Set<Route>().Find(routeId);
+            Route route = _dbContext.Routes.Find(routeId);
             if (route != null)
             {
-                _dbContext.Set<Route>().Remove(route);
+                _dbContext.Routes.Remove(route);
                 _dbContext.SaveChanges();
             }
         }
