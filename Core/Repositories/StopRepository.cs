@@ -12,7 +12,7 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Stop CreateStop(Stop stop)
+        public Stop AddStop(Stop stop)
         {
             _dbContext.Add(stop);
             _dbContext.SaveChanges();
@@ -29,11 +29,19 @@ namespace Core.Repositories
             return _dbContext.Stops.ToList();
         }
 
-        public Stop UpdateStop(Stop stop)
+        public void UpdateStop(int stopId, Stop stop)
         {
-            _dbContext.Entry(stop).State = EntityState.Modified;
-            _dbContext.SaveChanges();
-            return stop;
+            var stopToUpdate = _dbContext.Stops.Find(stopId);
+
+            if (stopToUpdate != null)
+            {
+                _dbContext.Entry(stopToUpdate).CurrentValues.SetValues(stop);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("No stop found.");
+            }
         }
 
         public void DeleteStop(int stopId)

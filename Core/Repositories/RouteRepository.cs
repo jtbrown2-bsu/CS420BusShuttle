@@ -12,7 +12,7 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Route CreateRoute(Route route)
+        public Route AddRoute(Route route)
         {
             _dbContext.Add(route);
             _dbContext.SaveChanges();
@@ -29,11 +29,19 @@ namespace Core.Repositories
             return _dbContext.Routes.ToList();
         }
 
-        public Route UpdateRoute(Route route)
+        public void UpdateRoute(int routeId, Route route)
         {
-            _dbContext.Entry(route).State = EntityState.Modified;
-            _dbContext.SaveChanges();
-            return route;
+            var routeToUpdate = _dbContext.Routes.Find(routeId);
+
+            if (routeToUpdate != null)
+            {
+                _dbContext.Entry(routeToUpdate).CurrentValues.SetValues(route);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("No route found.");
+            }
         }
 
         public void DeleteRoute(int routeId)
