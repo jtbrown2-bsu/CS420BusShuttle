@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using View.Models;
 
 namespace View.Controllers;
 
@@ -6,17 +7,19 @@ public class AccountController : Controller
 {
     public ActionResult Login()
     {
+        ViewBag.IsLoginPage = true;
         return View();
     }
 
     [HttpPost]
-    public ActionResult Login(string username, string password)
+    public ActionResult Login(LoginModel model)
     {
-        if (username == "admin" && password == "password")
+        if (ModelState.IsValid && model is { Username: "admin", Password: "password" })
         {
             return RedirectToAction("Index", "Home");
         }
         ViewBag.ErrorMessage = "Invalid username or password.";
-            return View();
+        ViewBag.IsLoginPage = true;
+            return View(model);
     }
 }
