@@ -1,0 +1,36 @@
+
+ # Team Meeting 04/25/2023
+
+## Meeting Start Time
+2023/04/20/16:00
+## Meeting End Time
+2023/04/20/16:30
+
+## Location/Medium
+
+Discord Call
+
+## Present
+
+Jared, Jacob, Julio, Conner, Landon
+
+## Minute Recorder
+
+Landon
+
+## Things Discussed
+* EF implemented
+* Landon will help Jacob with the views.
+* Progress of everyone else.
+
+## Tasks Distributed
+* Jared
+  * Will continue work on auth and implementing relations
+* Julio
+  * Will continue working on controllers
+* Jacob
+  * Will continue work on views
+* Conner
+  * Will continue work with SQLite
+ * Landon
+	 * Will work on the data connection between views and controllers
