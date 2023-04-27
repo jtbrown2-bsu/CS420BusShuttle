@@ -24,6 +24,13 @@ public class BusController : Controller
     {
         if (ModelState.IsValid)
         {
+            int newId = 1;
+            var buses = _busRepository.GetAllBusses();
+            if (buses.Any())
+            {
+                newId = buses.Min(b => b.Id) - 1;
+            }
+            model.Id = newId;
             _busRepository.AddBus(model);
             ViewData["Buses"] = _busRepository.GetAllBusses();
             return View();
