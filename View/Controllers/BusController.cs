@@ -27,7 +27,6 @@ namespace View.Controllers
             ViewData["Buses"] = _buses;
             return View(model);
         }
-
         public IActionResult EditBus(int id)
         {
             var model = _buses.FirstOrDefault(b => b.Id == id);
@@ -37,6 +36,29 @@ namespace View.Controllers
                 return NotFound();
             }
 
+            return View(model);
+        }
+        
+
+        [HttpPost]
+        public IActionResult EditBus(BusModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var bus = _buses.FirstOrDefault(b => b.Id == model.Id);
+
+                if (bus == null)
+                {
+                    return NotFound();
+                }
+
+                bus.BusNumber = model.BusNumber;
+                ViewData["Buses"] = _buses;
+
+                return View("BusCreate");
+            }
+
+            ViewData["Buses"] = _buses;
             return View(model);
         }
 
