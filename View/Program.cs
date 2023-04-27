@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<BusRepository>();
+builder.Services.AddScoped<DriverRepository>();
 builder.Services.AddDbContext<ShuttleDbContext>(options =>
     options.UseInMemoryDatabase("TestDatabase"));
 

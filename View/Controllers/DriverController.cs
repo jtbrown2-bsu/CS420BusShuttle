@@ -1,83 +1,69 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using View.Models;
+﻿using Core.Models;
+using Core.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
-namespace View.Controllers
+namespace View.Controllers;
+
+public class DriverController : Controller
 {
-    public class DriverController : Controller
-    {
-        private static List<DriverModel> _drivers = new List<DriverModel>();
+    private readonly DriverRepository _driverRepository;
 
-        public IActionResult DriverCreate()
+    public DriverController(DriverRepository driverRepository)
+    {
+        _driverRepository = driverRepository;
+    }
+
+    public IActionResult DriverCreate()
+    {
+        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult DriverCreate(Driver model)
+    {
+        if (ModelState.IsValid)
         {
-            ViewData["Drivers"] = _drivers;
+            _driverRepository.AddDriver(model);
+            ViewData["Drivers"] = _driverRepository.GetAllDrivers();
             return View();
         }
 
-        [HttpPost]
-        public IActionResult DriverCreate(DriverModel model)
+        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
+        return View(model);
+    }
+
+    public IActionResult EditDriver(int id)
+    {
+        var model = _driverRepository.GetDriver(id);
+
+        if (model == null)
         {
-            if (ModelState.IsValid)
-            {
-                model.Id = _drivers.Count + 1;
-                _drivers.Add(model);
-                ViewData["Drivers"] = _drivers;
-                return View();
-            }
-
-            ViewData["Drivers"] = _drivers;
-            return View(model);
-        }
-        
-        public IActionResult EditDriver(int id)
-        {
-            var model = _drivers.FirstOrDefault(b => b.Id == id);
-
-            if (model == null)
-            {
-                return NotFound();
-            }
-
-            return View(model);
-        }
-        
-
-        [HttpPost]
-        public IActionResult EditDriver(DriverModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var driver = _drivers.FirstOrDefault(b => b.Id == model.Id);
-
-                if (driver == null)
-                {
-                    return NotFound();
-                }
-
-                driver.FirstName = model.FirstName;
-                driver.LastName = model.LastName;
-                ViewData["Drivers"] = _drivers;
-
-                return View("DriverCreate");
-            }
-
-            ViewData["Drivers"] = _drivers;
-            return View(model);
+            return NotFound();
         }
 
-        [HttpPost]
-        public IActionResult DeleteDriver(int id)
+        return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult EditDriver(int id, Driver driver)
+    {
+        if (ModelState.IsValid)
         {
-            var driver = _drivers.FirstOrDefault(b => b.Id == id);
-
-            if (driver == null)
-            {
-                return NotFound();
-            }
-
-            _drivers.Remove(driver);
-
-            ViewData["Drivers"] = _drivers;
+            _driverRepository.UpdateDriver(id, driver);
+            ViewData["Drivers"] = _driverRepository.GetAllDrivers();
             return View("DriverCreate");
         }
+
+        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
+        return View(driver);
+    }
+
+    [HttpPost]
+    public IActionResult DeleteDriver(int id)
+    {
+        _driverRepository.DeleteDriver(id);
+        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
+        return View("DriverCreate");
     }
 }
