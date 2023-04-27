@@ -22,7 +22,7 @@ public class EntryRepository
             return entries;
         }
 
-        public Entry Add(Entry entry)
+        public void Add(Entry entry)
         {
             _dbContext.Entries.Add(entry);
             _dbContext.SaveChanges();
