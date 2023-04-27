@@ -1,0 +1,27 @@
+﻿@model List<DriverModel>
+
+<h2>Driver Table</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>FirstName</th>
+        <th>LastName</th>
+        <th>Edit</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var driver in Model)
+    {
+        <tr>
+            <td>@driver.Id</td>
+            <td>@driver.FirstName</td>
+            <td>@driver.LastName</td>
+            <td>
+                <a asp-action="EditDriver" asp-route-id="@driver.Id">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
