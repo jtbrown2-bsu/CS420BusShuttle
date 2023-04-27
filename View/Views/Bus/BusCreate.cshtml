@@ -1,4 +1,5 @@
-﻿@model BusModel
+﻿@using Core.Models
+@model Bus
 
 <h2>Create Bus</h2>
 
@@ -25,7 +26,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (var bus in (List<BusModel>)ViewData["Buses"])
+        @foreach (var bus in (List<Bus>)ViewData["Buses"])
         {
             <tr>
                 <td>@bus.Id</td>

@@ -1,7 +1,14 @@
+using Core;
+using Core.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<BusRepository>();
+builder.Services.AddDbContext<ShuttleDbContext>(options =>
+    options.UseInMemoryDatabase("TestDatabase"));
 
 var app = builder.Build();
 

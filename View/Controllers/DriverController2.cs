@@ -1,4 +1,5 @@
-﻿using Core.Models;
+﻿/*
+using Core.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using View.Models;
@@ -82,3 +83,4 @@ public class DriverController2 : Controller
     }
     
 }
+*/

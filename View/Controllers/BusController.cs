@@ -1,81 +1,69 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using View.Models;
+﻿using Core.Models;
+using Core.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
-namespace View.Controllers
+namespace View.Controllers;
+
+public class BusController : Controller
 {
-    public class BusController : Controller
-    {
-        private static List<BusModel> _buses = new List<BusModel>();
+    private readonly BusRepository _busRepository;
 
-        public IActionResult BusCreate()
+    public BusController(BusRepository busRepository)
+    {
+        _busRepository = busRepository;
+    }
+
+    public IActionResult BusCreate()
+    {
+        ViewData["Buses"] = _busRepository.GetAllBusses();
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult BusCreate(Bus model)
+    {
+        if (ModelState.IsValid)
         {
-            ViewData["Buses"] = _buses;
+            _busRepository.AddBus(model);
+            ViewData["Buses"] = _busRepository.GetAllBusses();
             return View();
         }
 
-        [HttpPost]
-        public IActionResult BusCreate(BusModel model)
+        ViewData["Buses"] = _busRepository.GetAllBusses();
+        return View(model);
+    }
+
+    public IActionResult EditBus(int id)
+    {
+        var model = _busRepository.GetBus(id);
+
+        if (model == null)
         {
-            if (ModelState.IsValid)
-            {
-                model.Id = _buses.Count + 1;
-                _buses.Add(model);
-                ViewData["Buses"] = _buses;
-                return View();
-            }
-
-            ViewData["Buses"] = _buses;
-            return View(model);
-        }
-        public IActionResult EditBus(int id)
-        {
-            var model = _buses.FirstOrDefault(b => b.Id == id);
-
-            if (model == null)
-            {
-                return NotFound();
-            }
-
-            return View(model);
-        }
-        
-
-        [HttpPost]
-        public IActionResult EditBus(BusModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var bus = _buses.FirstOrDefault(b => b.Id == model.Id);
-
-                if (bus == null)
-                {
-                    return NotFound();
-                }
-
-                bus.BusNumber = model.BusNumber;
-                ViewData["Buses"] = _buses;
-
-                return View("BusCreate");
-            }
-
-            ViewData["Buses"] = _buses;
-            return View(model);
+            return NotFound();
         }
 
-        [HttpPost]
-        public IActionResult DeleteBus(int id)
+        return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult EditBus(int id, Bus bus)
+    {
+        if (ModelState.IsValid)
         {
-            var bus = _buses.FirstOrDefault(b => b.Id == id);
-
-            if (bus == null)
-            {
-                return NotFound();
-            }
-
-            _buses.Remove(bus);
-
-            ViewData["Buses"] = _buses;
+            _busRepository.UpdateBus(id, bus);
+            ViewData["Buses"] = _busRepository.GetAllBusses();
             return View("BusCreate");
         }
+
+        ViewData["Buses"] = _busRepository.GetAllBusses();
+        return View(bus);
+    }
+
+    [HttpPost]
+    public IActionResult DeleteBus(int id)
+    {
+        _busRepository.DeleteBus(id);
+        ViewData["Buses"] = _busRepository.GetAllBusses();
+        return View("BusCreate");
     }
 }
