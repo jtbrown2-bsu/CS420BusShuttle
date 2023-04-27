@@ -1,6 +1,7 @@
-﻿namespace Core.Models;
+﻿
+namespace View.Models;
 
-public class Bus
+public class BusModel
 {
     public int Id { get; set; }
     public int BusNumber { get; set; }
