@@ -12,47 +12,57 @@ public class LoopController : Controller
     {
         _loopRepository = loopRepository;
     }
-    public IActionResult Index()
+    public IActionResult LoopCreate()
     {
+        ViewData["Loops"] = _loopRepository.GetAllLoops();
         return View();
     }
     
-    [HttpGet]
-    public IActionResult GetAllLoops()
-    {
-        return View(_loopRepository.GetAllLoops());
-    }
-
-    [HttpGet]
-    public IActionResult GetLoopById(int id)
-    {
-        var loop = _loopRepository.GetLoop(id);
-        return View(loop);
-    }
-
     [HttpPost]
-    public IActionResult AddBus(Loop loop)
+    public IActionResult LoopCreate(Loop model)
     {
-        if (!ModelState.IsValid) return View(loop);
-        
-        _loopRepository.AddLoop(loop);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            _loopRepository.AddLoop(model);
+            ViewData["Loops"] = _loopRepository.GetAllLoops();
+            return View();
+        }
 
+        ViewData["Loops"] = _loopRepository.GetAllLoops();
+        return View(model);
     }
+    
+    public IActionResult EditLoop(int id)
+    {
+        var model = _loopRepository.GetLoop(id);
 
-    [HttpPut]
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+    
+    [HttpPost]
     public IActionResult EditLoop(int id, Loop loop)
     {
-        if (!ModelState.IsValid) return View(loop);
-        _loopRepository.UpdateLoop(id, loop);
-        return RedirectToAction(nameof(System.Index));
+        if (ModelState.IsValid)
+        {
+            _loopRepository.UpdateLoop(id, loop);
+            ViewData["Loops"] = _loopRepository.GetAllLoops();
+            return View("LoopCreate");
+        }
 
+        ViewData["Loops"] = _loopRepository.GetAllLoops();
+        return View(loop);
     }
-
-    [HttpDelete]
+    
+    [HttpPost]
     public IActionResult DeleteLoop(int id)
     {
         _loopRepository.DeleteLoop(id);
-        return RedirectToAction(nameof(Index));
+        ViewData["Loops"] = _loopRepository.GetAllLoops();
+        return View("LoopCreate");
     }
 }

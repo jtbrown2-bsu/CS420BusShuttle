@@ -1,0 +1,46 @@
+﻿@using Core.Models
+@model Loop
+
+<h2>Create Loop</h2>
+
+<form asp-action="LoopCreate">
+    <div asp-validation-summary="All"></div>
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" value="" />
+        <span asp-validation-for="Name"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+@if (ViewData["Loops"] != null)
+{
+    <h2>Loop Table</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var loop in (List<Loop>)ViewData["Loops"])
+        {
+            <tr>
+                <td>@loop.Id</td>
+                <td>@loop.Name</td>
+                <td>
+                    <a asp-action="EditLoop" asp-route-id="@loop.Id">Edit</a>
+                </td>
+                <td>
+                    <form method="post" asp-action="DeleteLoop" asp-route-id="@loop.Id">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

@@ -8,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<BusRepository>();
 builder.Services.AddScoped<DriverRepository>();
+builder.Services.AddScoped<LoopRepository>();
+builder.Services.AddScoped<RouteRepository>();
+builder.Services.AddScoped<StopRepository>();
+builder.Services.AddScoped<EntryRepository>();
 builder.Services.AddDbContext<ShuttleDbContext>(options =>
     options.UseInMemoryDatabase("TestDatabase"));
 
