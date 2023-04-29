@@ -13,47 +13,60 @@ public class StopController : Controller
     {
         _stopRepository = stopRepository;
     }
-    public IActionResult Index()
+    public IActionResult StopCreate()
     {
+        ViewData["Stops"] = _stopRepository.GetAllStops();
         return View();
-    }
-    
-    [HttpGet]
-    public IActionResult GetAllStops()
-    {
-        return View(_stopRepository.GetAllStops());
-    }
-
-    [HttpGet]
-    public IActionResult GetBusById(int id)
-    {
-        var stop = _stopRepository.GetStop(id);
-        return View(stop);
     }
 
     [HttpPost]
-    public IActionResult AddStop(Stop stop)
+    public IActionResult StopCreate(Stop stop)
     {
-        if (!ModelState.IsValid) return View(stop);
-        
-        _stopRepository.AddStop(stop);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            _stopRepository.AddStop(stop);
+            ViewData["Stops"] = _stopRepository.GetAllStops();
+            return View();
+        }
+
+        ViewData["Stops"] = _stopRepository.GetAllStops();
+        return View(stop);
+
 
     }
 
-    [HttpPut]
-    public IActionResult EditBus(int id,Stop stop)
+    public IActionResult EditStop(int id)
     {
-        if (!ModelState.IsValid) return View(stop);
-        _stopRepository.UpdateStop(id, stop);
-        return RedirectToAction(nameof(System.Index));
+        var model = _stopRepository.GetStop(id);
 
+        if (model == null)
+        {
+            return NotFound();
+
+        }
+
+        return View(model);
     }
 
-    [HttpDelete]
+    [HttpPost]
+    public IActionResult EditStop(int id,Stop stop)
+    {
+        if (ModelState.IsValid)
+        {
+            _stopRepository.UpdateStop(id, stop);
+            ViewData["Loops"] = _stopRepository.GetAllStops();
+            return View("StopCreate");
+        }
+
+        ViewData["Stops"] = _stopRepository.GetAllStops();
+        return View(stop);
+      }
+
+    [HttpPost]
     public IActionResult DeleteBus(int id)
     {
         _stopRepository.DeleteStop(id);
-        return RedirectToAction(nameof(Index));
+        ViewData["Stops"] = _stopRepository.GetAllStops();
+        return View("StopCreate");
     }
 }
