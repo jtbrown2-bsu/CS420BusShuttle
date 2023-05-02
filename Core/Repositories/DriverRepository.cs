@@ -12,24 +12,24 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Driver AddDriver(Driver driver)
+        public Driver Add(Driver driver)
         {
             _dbContext.Add(driver);
             _dbContext.SaveChanges();
             return driver;
         }
 
-        public Driver GetDriver(int id)
+        public Driver Get(int id)
         {
             return _dbContext.Drivers.Find(id);
         }
 
-        public IEnumerable<Driver> GetAllDrivers()
+        public IEnumerable<Driver> Get()
         {
             return _dbContext.Set<Driver>().ToList();
         }
 
-        public void UpdateDriver(int driverId, Driver driver)
+        public void Update(int driverId, Driver driver)
         {
             var driverToUpdate = _dbContext.Drivers.Find(driverId);
 
@@ -44,7 +44,7 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteDriver(int id)
+        public void Delete(int id)
         {
             Driver driver = _dbContext.Drivers.Find(id);
             if (driver != null)

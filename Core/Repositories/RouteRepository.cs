@@ -12,24 +12,24 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Route AddRoute(Route route)
+        public Route Add(Route route)
         {
             _dbContext.Add(route);
             _dbContext.SaveChanges();
             return route;
         }
 
-        public Route GetRoute(int routeId)
+        public Route Get(int routeId)
         {
             return _dbContext.Routes.Find(routeId);
         }
 
-        public IEnumerable<Route> GetAllRoutes()
+        public IEnumerable<Route> Get()
         {
             return _dbContext.Routes.ToList();
         }
 
-        public void UpdateRoute(int routeId, Route route)
+        public void Update(int routeId, Route route)
         {
             var routeToUpdate = _dbContext.Routes.Find(routeId);
 
@@ -44,7 +44,7 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteRoute(int routeId)
+        public void Delete(int routeId)
         {
             Route route = _dbContext.Routes.Find(routeId);
             if (route != null)

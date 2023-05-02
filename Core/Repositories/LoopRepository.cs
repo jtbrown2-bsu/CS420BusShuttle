@@ -12,22 +12,22 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public void AddLoop(Loop loop)
+        public void Add(Loop loop)
         {
             _dbContext.Loops.Add(loop);
             _dbContext.SaveChanges();
         }
-        public Loop GetLoop(int id)
+        public Loop Get(int id)
         {
             return _dbContext.Loops.Find(id);
         }
 
-        public IEnumerable<Loop> GetAllLoops()
+        public IEnumerable<Loop> Get()
         {
             return _dbContext.Loops.ToList();
         }
 
-        public void UpdateLoop(int loopId, Loop loop)
+        public void Update(int loopId, Loop loop)
         {
             var loopToUpdate = _dbContext.Loops.Find(loopId);
 
@@ -42,7 +42,7 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteLoop(int id)
+        public void Delete(int id)
         {
             var loop = _dbContext.Loops.Find(id);
             if (loop != null)

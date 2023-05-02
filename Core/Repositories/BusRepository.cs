@@ -12,23 +12,23 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public void AddBus(Bus bus)
+        public void Add(Bus bus)
         {
             _dbContext.Busses.Add(bus);
             _dbContext.SaveChanges();
         }
 
-        public Bus GetBus(int id)
+        public Bus Get(int id)
         {
             return _dbContext.Busses.Find(id);
         }
 
-        public IEnumerable<Bus> GetAllBusses()
+        public IEnumerable<Bus> Get()
         {
             return _dbContext.Busses.ToList();
         }
 
-        public void UpdateBus(int busId, Bus bus)
+        public void Update(int busId, Bus bus)
         {
             var busToUpdate = _dbContext.Busses.Find(busId);
 
@@ -43,7 +43,7 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteBus(int id)
+        public void Delete(int id)
         {
             var bus = _dbContext.Busses.Find(id);
             if (bus != null)

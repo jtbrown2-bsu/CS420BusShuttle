@@ -12,24 +12,24 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Stop AddStop(Stop stop)
+        public Stop Add(Stop stop)
         {
             _dbContext.Add(stop);
             _dbContext.SaveChanges();
             return stop;
         }
 
-        public Stop GetStop(int stopId)
+        public Stop Get(int stopId)
         {
             return _dbContext.Stops.Find(stopId);
         }
 
-        public IEnumerable<Stop> GetAllStops()
+        public IEnumerable<Stop> Get()
         {
             return _dbContext.Stops.ToList();
         }
 
-        public void UpdateStop(int stopId, Stop stop)
+        public void Update(int stopId, Stop stop)
         {
             var stopToUpdate = _dbContext.Stops.Find(stopId);
 
@@ -44,7 +44,7 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteStop(int stopId)
+        public void Delete(int stopId)
         {
             Stop stop = _dbContext.Stops.Find(stopId);
             if (stop != null)
