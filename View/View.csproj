@@ -23,7 +23,6 @@
 
     <ItemGroup>
       <Folder Include="Views\Driver\" />
-      <Folder Include="Views\Stop\" />
     </ItemGroup>
 
 </Project>
