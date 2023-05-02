@@ -12,31 +12,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Stop Add(Stop stop)
+        public async void Add(Stop stop)
         {
-            _dbContext.Add(stop);
-            _dbContext.SaveChanges();
-            return stop;
+            await _dbContext.Stops.AddAsync(stop);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Stop Get(int stopId)
+        public async Task<Stop> Get(int id)
         {
-            return _dbContext.Stops.Find(stopId);
+            return await _dbContext.Stops.FindAsync(id);
         }
 
-        public IEnumerable<Stop> Get()
+        public async Task<List<Stop>> Get()
         {
-            return _dbContext.Stops.ToList();
+            return await _dbContext.Stops.ToListAsync();
         }
 
-        public void Update(int stopId, Stop stop)
+        public async void Update(Stop stop)
         {
-            var stopToUpdate = _dbContext.Stops.Find(stopId);
+            var itemToUpdate = await _dbContext.Stops.FindAsync(stop.Id);
 
-            if (stopToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(stopToUpdate).CurrentValues.SetValues(stop);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(stop);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,14 +43,17 @@ namespace Core.Repositories
             }
         }
 
-        public void Delete(int stopId)
+        public async void Delete(int id)
         {
-            Stop stop = _dbContext.Stops.Find(stopId);
-            if (stop != null)
+            var itemToDelete = await _dbContext.Stops.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Stops.Remove(stop);
-                _dbContext.SaveChanges();
+                throw new Exception("No stop found.");
             }
+
+            _dbContext.Stops.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

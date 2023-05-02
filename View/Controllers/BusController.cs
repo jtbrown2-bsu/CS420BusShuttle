@@ -13,6 +13,12 @@ public class BusController : Controller
         _busRepository = busRepository;
     }
 
+    public async Task<IActionResult> Index()
+    {
+        var buses = await _busRepository.Get();
+        return View(buses);
+    }
+
     public IActionResult BusCreate()
     {
         ViewData["Buses"] = _busRepository.GetAllBusses();

@@ -12,30 +12,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public void Add(Bus bus)
+        public async void Add(Bus bus)
         {
-            _dbContext.Busses.Add(bus);
-            _dbContext.SaveChanges();
+            await _dbContext.Buses.AddAsync(bus);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Bus Get(int id)
+        public async Task<Bus> Get(int id)
         {
-            return _dbContext.Busses.Find(id);
+            return await _dbContext.Buses.FindAsync(id);
         }
 
-        public IEnumerable<Bus> Get()
+        public async Task<List<Bus>> Get()
         {
-            return _dbContext.Busses.ToList();
+            return await _dbContext.Buses.ToListAsync();
         }
 
-        public void Update(int busId, Bus bus)
+        public async void Update(Bus bus)
         {
-            var busToUpdate = _dbContext.Busses.Find(busId);
+            var itemToUpdate = await _dbContext.Buses.FindAsync(bus.Id);
 
-            if (busToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(busToUpdate).CurrentValues.SetValues(bus);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(bus);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -43,14 +43,17 @@ namespace Core.Repositories
             }
         }
 
-        public void Delete(int id)
+        public async void Delete(int id)
         {
-            var bus = _dbContext.Busses.Find(id);
-            if (bus != null)
+            var itemToDelete = await _dbContext.Buses.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Busses.Remove(bus);
-                _dbContext.SaveChanges();
+                throw new Exception("No bus found.");
             }
+
+            _dbContext.Buses.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

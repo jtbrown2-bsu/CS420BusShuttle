@@ -12,31 +12,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Driver Add(Driver driver)
+        public async void Add(Driver driver)
         {
-            _dbContext.Add(driver);
-            _dbContext.SaveChanges();
-            return driver;
+            await _dbContext.Drivers.AddAsync(driver);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Driver Get(int id)
+        public async Task<Driver> Get(int id)
         {
-            return _dbContext.Drivers.Find(id);
+            return await _dbContext.Drivers.FindAsync(id);
         }
 
-        public IEnumerable<Driver> Get()
+        public async Task<List<Driver>> Get()
         {
-            return _dbContext.Set<Driver>().ToList();
+            return await _dbContext.Drivers.ToListAsync();
         }
 
-        public void Update(int driverId, Driver driver)
+        public async void Update(Driver driver)
         {
-            var driverToUpdate = _dbContext.Drivers.Find(driverId);
+            var itemToUpdate = await _dbContext.Drivers.FindAsync(driver.Id);
 
-            if (driverToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(driverToUpdate).CurrentValues.SetValues(driver);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(driver);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,14 +43,17 @@ namespace Core.Repositories
             }
         }
 
-        public void Delete(int id)
+        public async void Delete(int id) 
         {
-            Driver driver = _dbContext.Drivers.Find(id);
-            if (driver != null)
+            var itemToDelete = await _dbContext.Drivers.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Set<Driver>().Remove(driver);
-                _dbContext.SaveChanges();
+                throw new Exception("No driver found.");
             }
+
+            _dbContext.Drivers.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     
     }

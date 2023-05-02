@@ -12,29 +12,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public void Add(Loop loop)
+        public async void Add(Loop loop)
         {
-            _dbContext.Loops.Add(loop);
-            _dbContext.SaveChanges();
-        }
-        public Loop Get(int id)
-        {
-            return _dbContext.Loops.Find(id);
+            await _dbContext.Loops.AddAsync(loop);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public IEnumerable<Loop> Get()
+        public async Task<Loop> Get(int id)
         {
-            return _dbContext.Loops.ToList();
+            return await _dbContext.Loops.FindAsync(id);
         }
 
-        public void Update(int loopId, Loop loop)
+        public async Task<List<Loop>> Get()
         {
-            var loopToUpdate = _dbContext.Loops.Find(loopId);
+            return await _dbContext.Loops.ToListAsync();
+        }
 
-            if (loopToUpdate != null)
+        public async void Update(Loop loop)
+        {
+            var itemToUpdate = await _dbContext.Loops.FindAsync(loop.Id);
+
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(loopToUpdate).CurrentValues.SetValues(loop);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(loop);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -42,14 +43,17 @@ namespace Core.Repositories
             }
         }
 
-        public void Delete(int id)
+        public async void Delete(int id)
         {
-            var loop = _dbContext.Loops.Find(id);
-            if (loop != null)
+            var itemToDelete = await _dbContext.Loops.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Loops.Remove(loop);
-                _dbContext.SaveChanges();
+                throw new Exception("No loop found.");
             }
+
+            _dbContext.Loops.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

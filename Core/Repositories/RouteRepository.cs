@@ -12,31 +12,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Route Add(Route route)
+        public async void Add(Route route)
         {
-            _dbContext.Add(route);
-            _dbContext.SaveChanges();
-            return route;
+            await _dbContext.Routes.AddAsync(route);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Route Get(int routeId)
+        public async Task<Route> Get(int routeId)
         {
-            return _dbContext.Routes.Find(routeId);
+            return await _dbContext.Routes.FindAsync(routeId);
         }
 
-        public IEnumerable<Route> Get()
+        public async Task<List<Route>> Get()
         {
-            return _dbContext.Routes.ToList();
+            return await _dbContext.Routes.ToListAsync();
         }
 
-        public void Update(int routeId, Route route)
+        public async void Update(Route route)
         {
-            var routeToUpdate = _dbContext.Routes.Find(routeId);
+            var itemToUpdate = await _dbContext.Routes.FindAsync(route.Id);
 
-            if (routeToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(routeToUpdate).CurrentValues.SetValues(route);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(route);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,14 +43,17 @@ namespace Core.Repositories
             }
         }
 
-        public void Delete(int routeId)
+        public async void Delete(int id)
         {
-            Route route = _dbContext.Routes.Find(routeId);
-            if (route != null)
+            var itemToDelete = await _dbContext.Routes.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Routes.Remove(route);
-                _dbContext.SaveChanges();
+                throw new Exception("No route found.");
             }
+
+            _dbContext.Routes.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
