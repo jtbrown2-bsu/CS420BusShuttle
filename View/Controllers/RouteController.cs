@@ -18,6 +18,21 @@ public class RouteController : Controller
         _stopRepository = stopRepository;
     }
 
+    private async Task<List<SelectListItem>> GetAvailableStops()
+    {
+        var stops = await _stopRepository.Get();
+        var viewbagSelect = new List<SelectListItem>();
+        foreach (var stop in stops)
+        {
+            viewbagSelect.Add(new SelectListItem
+            {
+                Text = stop.Name,
+                Value = stop.Id.ToString()
+            });
+        }
+        return viewbagSelect;
+    }
+
     public async Task<IActionResult> Index()
     {
         var routes = await _routeRepository.Get();
@@ -26,18 +41,9 @@ public class RouteController : Controller
 
     public async Task<IActionResult> Create()
     {
-        var stops = await _stopRepository.Get();
-        var viewModel = new RouteViewModel();
-        foreach(var stop in stops)
-        {
-            viewModel.AvailableStops.Add(new SelectListItem
-            {
-                Text = stop.Name,
-                Value = stop.Id.ToString()
-            });
-        }
-
-        return View(viewModel);
+        ViewBag.AvailableStops = await GetAvailableStops();
+        
+        return View(new RouteViewModel());
     }
 
     [HttpPost]
@@ -48,7 +54,7 @@ public class RouteController : Controller
             var route = new Core.Models.Route
             {
                 Order = model.Order,
-                StopId = model.SelectedStopId,
+                StopId = model.StopId,
             };
             await _routeRepository.Add(route);
             return RedirectToAction("Index");
@@ -66,17 +72,33 @@ public class RouteController : Controller
             return NotFound();
         }
 
-        return View(model);
+        ViewBag.AvailableStops = await GetAvailableStops();
+
+        var viewModel = new RouteViewModel
+        {
+            Id = model.Id,
+            Order = model.Order,
+            StopId = model.StopId
+        };
+
+
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Core.Models.Route model)
+    public async Task<IActionResult> Edit(RouteViewModel model)
     {
         if (ModelState.IsValid)
         {
+            var route = new Core.Models.Route
+            {
+                Id = model.Id,
+                Order = model.Order,
+                StopId = model.StopId,
+            };
             try
             {
-                await _routeRepository.Update(model);
+                await _routeRepository.Update(route);
             }
             catch
             {
