@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class StopRepository
+    public interface IStopRepository
+    {
+        Task Add(Stop stop);
+        Task Delete(int id);
+        Task<List<Stop>> Get();
+        Task<Stop> Get(int id);
+        Task Update(Stop stop);
+    }
+
+    public class StopRepository : IStopRepository
     {
         private readonly ShuttleDbContext _dbContext;
 

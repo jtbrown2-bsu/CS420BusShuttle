@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class DriverRepository
+    public interface IDriverRepository
+    {
+        Task Add(Driver driver);
+        Task Delete(int id);
+        Task<List<Driver>> Get();
+        Task<Driver> Get(int id);
+        Task Update(Driver driver);
+    }
+
+    public class DriverRepository : IDriverRepository
     {
         private readonly ShuttleDbContext _dbContext;
 
@@ -43,7 +52,7 @@ namespace Core.Repositories
             }
         }
 
-        public async Task Delete(int id) 
+        public async Task Delete(int id)
         {
             var itemToDelete = await _dbContext.Drivers.FindAsync(id);
             if (itemToDelete == null)
@@ -55,6 +64,6 @@ namespace Core.Repositories
 
             await _dbContext.SaveChangesAsync();
         }
-    
+
     }
 }

@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class LoopRepository
+    public interface ILoopRepository
+    {
+        Task Add(Loop loop);
+        Task Delete(int id);
+        Task<List<Loop>> Get();
+        Task<Loop> Get(int id);
+        Task Update(Loop loop);
+    }
+
+    public class LoopRepository : ILoopRepository
     {
         private readonly ShuttleDbContext _dbContext;
 

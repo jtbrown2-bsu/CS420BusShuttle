@@ -5,7 +5,7 @@ namespace Core
 {
     public class ShuttleDbContext : DbContext
     {
-        public ShuttleDbContext(DbContextOptions options) : base(options)
+        public ShuttleDbContext()
         {
 
         }

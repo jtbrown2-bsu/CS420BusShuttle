@@ -6,14 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<BusRepository>();
-builder.Services.AddScoped<DriverRepository>();
-builder.Services.AddScoped<LoopRepository>();
-builder.Services.AddScoped<RouteRepository>();
-builder.Services.AddScoped<StopRepository>();
-builder.Services.AddScoped<EntryRepository>();
-builder.Services.AddDbContext<ShuttleDbContext>(options =>
-    options.UseInMemoryDatabase("TestDatabase"));
+builder.Services.AddDbContext<ShuttleDbContext>();
+builder.Services.AddScoped<IBusRepository, BusRepository>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IEntryRepository, EntryRepository>();
+builder.Services.AddScoped<ILoopRepository, LoopRepository>();
+builder.Services.AddScoped<IRouteRepository, RouteRepository>();
+builder.Services.AddScoped<IStopRepository, StopRepository>();
 
 var app = builder.Build();
 
@@ -32,8 +31,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+app.MapDefaultControllerRoute();
 
 app.Run();

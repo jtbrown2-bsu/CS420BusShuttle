@@ -3,7 +3,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.Repositories;
 
-public class EntryRepository
+public interface IEntryRepository
+{
+    Task Add(Entry entry);
+    Task Delete(int id);
+    Task<List<Entry>> Get();
+    Task<Entry> Get(int id);
+    Task Update(Entry entry);
+}
+
+public class EntryRepository : IEntryRepository
 {
     private readonly ShuttleDbContext _dbContext;
 

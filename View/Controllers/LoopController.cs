@@ -6,9 +6,9 @@ namespace View.Controllers;
 
 public class LoopController : Controller
 {
-    private readonly LoopRepository _loopRepository;
+    private readonly ILoopRepository _loopRepository;
 
-    public LoopController(LoopRepository loopRepository)
+    public LoopController(ILoopRepository loopRepository)
     {
         _loopRepository = loopRepository;
     }

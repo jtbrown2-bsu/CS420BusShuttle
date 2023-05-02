@@ -6,9 +6,9 @@ namespace View.Controllers;
 
 public class StopController : Controller
 {
-    private readonly StopRepository _stopRepository;
+    private readonly IStopRepository _stopRepository;
 
-    public StopController(StopRepository stopRepository)
+    public StopController(IStopRepository stopRepository)
     {
         _stopRepository = stopRepository;
     }

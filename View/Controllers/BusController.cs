@@ -6,9 +6,9 @@ namespace View.Controllers;
 
 public class BusController : Controller
 {
-    private readonly BusRepository _busRepository;
+    private readonly IBusRepository _busRepository;
 
-    public BusController(BusRepository busRepository)
+    public BusController(IBusRepository busRepository)
     {
         _busRepository = busRepository;
     }

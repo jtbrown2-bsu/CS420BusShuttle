@@ -6,9 +6,9 @@ namespace View.Controllers;
 
 public class DriverController : Controller
 {
-    private readonly DriverRepository _driverRepository;
+    private readonly IDriverRepository _driverRepository;
 
-    public DriverController(DriverRepository driverRepository)
+    public DriverController(IDriverRepository driverRepository)
     {
         _driverRepository = driverRepository;
     }

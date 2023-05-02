@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class RouteRepository
+    public interface IRouteRepository
+    {
+        Task Add(Route route);
+        Task Delete(int id);
+        Task<List<Route>> Get();
+        Task<Route> Get(int routeId);
+        Task Update(Route route);
+    }
+
+    public class RouteRepository : IRouteRepository
     {
         private readonly ShuttleDbContext _dbContext;
 
