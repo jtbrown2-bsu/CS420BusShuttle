@@ -1,16 +1,21 @@
 ﻿using Core.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using View.Models;
 
 namespace View.Controllers;
 
 public class RouteController : Controller
 {
     private readonly IRouteRepository _routeRepository;
+    private readonly IStopRepository _stopRepository;
 
-    public RouteController(IRouteRepository routeRepository)
+    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository)
     {
         _routeRepository = routeRepository;
+        _stopRepository = stopRepository;
     }
 
     public async Task<IActionResult> Index()
@@ -19,17 +24,33 @@ public class RouteController : Controller
         return View(routes);
     }
 
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View();
+        var stops = await _stopRepository.Get();
+        var viewModel = new RouteViewModel();
+        foreach(var stop in stops)
+        {
+            viewModel.AvailableStops.Add(new SelectListItem
+            {
+                Text = stop.Name,
+                Value = stop.Id.ToString()
+            });
+        }
+
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Core.Models.Route model)
+    public async Task<IActionResult> Create(RouteViewModel model)
     {
         if (ModelState.IsValid)
         {
-            await _routeRepository.Add(model);
+            var route = new Core.Models.Route
+            {
+                Order = model.Order,
+                StopId = model.SelectedStopId,
+            };
+            await _routeRepository.Add(route);
             return RedirectToAction("Index");
         }
 

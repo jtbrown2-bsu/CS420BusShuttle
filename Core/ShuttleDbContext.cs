@@ -18,7 +18,9 @@ namespace Core
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Route>().Navigation(e => e.Stop).AutoInclude();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
