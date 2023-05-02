@@ -19,29 +19,26 @@ public class BusController : Controller
         return View(buses);
     }
 
-    public IActionResult BusCreate()
+    public IActionResult Create()
     {
-        ViewData["Buses"] = _busRepository.GetAllBusses();
         return View();
     }
 
     [HttpPost]
-    public IActionResult BusCreate(Bus model)
+    public async Task<IActionResult> Create(Bus model)
     {
         if (ModelState.IsValid)
         {
-            _busRepository.AddBus(model);
-            ViewData["Buses"] = _busRepository.GetAllBusses();
-            return View();
+            await _busRepository.Add(model);
+            return RedirectToAction("Index");
         }
 
-        ViewData["Buses"] = _busRepository.GetAllBusses();
         return View(model);
     }
 
-    public IActionResult EditBus(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _busRepository.GetBus(id);
+        var model = await _busRepository.Get(id);
 
         if (model == null)
         {
@@ -52,24 +49,47 @@ public class BusController : Controller
     }
 
     [HttpPost]
-    public IActionResult EditBus(int id, Bus bus)
+    public async Task<IActionResult> Edit(Bus model)
     {
         if (ModelState.IsValid)
         {
-            _busRepository.UpdateBus(id, bus);
-            ViewData["Buses"] = _busRepository.GetAllBusses();
-            return View("BusCreate");
+            try
+            {
+                await _busRepository.Update(model);
+            } catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Buses"] = _busRepository.GetAllBusses();
-        return View(bus);
+        return View(model);
     }
 
-    [HttpPost]
-    public IActionResult DeleteBus(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _busRepository.DeleteBus(id);
-        ViewData["Buses"] = _busRepository.GetAllBusses();
-        return View("BusCreate");
+        var model = await _busRepository.Get(id);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _busRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

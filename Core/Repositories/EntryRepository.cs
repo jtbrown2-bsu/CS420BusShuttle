@@ -22,13 +22,13 @@ public class EntryRepository
         return await _dbContext.Entries.ToListAsync();
     }
 
-    public async void Add(Entry entry)
+    public async Task Add(Entry entry)
     {
         await _dbContext.Entries.AddAsync(entry);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async void Update(Entry entry)
+    public async Task Update(Entry entry)
     {
         var itemToUpdate = await _dbContext.Entries.FindAsync(entry);
 
@@ -43,7 +43,7 @@ public class EntryRepository
         }
     }
 
-    public async void DeleteComment(int id)
+    public async Task Delete(int id)
     {
         var itemToDelete = await _dbContext.Entries.FindAsync(id);
         if (itemToDelete == null)

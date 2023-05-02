@@ -13,29 +13,32 @@ public class DriverController : Controller
         _driverRepository = driverRepository;
     }
 
-    public IActionResult DriverCreate()
+    public async Task<IActionResult> Index()
     {
-        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
+        var drivers = await _driverRepository.Get();
+        return View(drivers);
+    }
+
+    public IActionResult Create()
+    {
         return View();
     }
 
     [HttpPost]
-    public IActionResult DriverCreate(Driver model)
+    public async Task<IActionResult> Create(Driver model)
     {
         if (ModelState.IsValid)
         {
-            _driverRepository.AddDriver(model);
-            ViewData["Drivers"] = _driverRepository.GetAllDrivers();
-            return View();
+            await _driverRepository.Add(model);
+            return RedirectToAction("Index");
         }
 
-        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
         return View(model);
     }
 
-    public IActionResult EditDriver(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _driverRepository.GetDriver(id);
+        var model = await _driverRepository.Get(id);
 
         if (model == null)
         {
@@ -46,24 +49,48 @@ public class DriverController : Controller
     }
 
     [HttpPost]
-    public IActionResult EditDriver(int id, Driver driver)
+    public async Task<IActionResult> Edit(Driver model)
     {
         if (ModelState.IsValid)
         {
-            _driverRepository.UpdateDriver(id, driver);
-            ViewData["Drivers"] = _driverRepository.GetAllDrivers();
-            return View("DriverCreate");
+            try
+            {
+                await _driverRepository.Update(model);
+            }
+            catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
-        return View(driver);
+        return View(model);
     }
 
-    [HttpPost]
-    public IActionResult DeleteDriver(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _driverRepository.DeleteDriver(id);
-        ViewData["Drivers"] = _driverRepository.GetAllDrivers();
-        return View("DriverCreate");
+        var model = await _driverRepository.Get(id);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _driverRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

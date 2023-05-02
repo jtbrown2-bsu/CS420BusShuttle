@@ -12,29 +12,33 @@ public class LoopController : Controller
     {
         _loopRepository = loopRepository;
     }
-    public IActionResult LoopCreate()
+
+    public async Task<IActionResult> Index()
     {
-        ViewData["Loops"] = _loopRepository.GetAllLoops();
+        var loops = await _loopRepository.Get();
+        return View(loops);
+    }
+
+    public IActionResult Create()
+    {
         return View();
     }
-    
+
     [HttpPost]
-    public IActionResult LoopCreate(Loop model)
+    public async Task<IActionResult> Create(Loop model)
     {
         if (ModelState.IsValid)
         {
-            _loopRepository.AddLoop(model);
-            ViewData["Loops"] = _loopRepository.GetAllLoops();
-            return View();
+            await _loopRepository.Add(model);
+            return RedirectToAction("Index");
         }
 
-        ViewData["Loops"] = _loopRepository.GetAllLoops();
         return View(model);
     }
-    
-    public IActionResult EditLoop(int id)
+
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _loopRepository.GetLoop(id);
+        var model = await _loopRepository.Get(id);
 
         if (model == null)
         {
@@ -43,26 +47,50 @@ public class LoopController : Controller
 
         return View(model);
     }
-    
+
     [HttpPost]
-    public IActionResult EditLoop(int id, Loop loop)
+    public async Task<IActionResult> Edit(Loop model)
     {
         if (ModelState.IsValid)
         {
-            _loopRepository.UpdateLoop(id, loop);
-            ViewData["Loops"] = _loopRepository.GetAllLoops();
-            return View("LoopCreate");
+            try
+            {
+                await _loopRepository.Update(model);
+            }
+            catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Loops"] = _loopRepository.GetAllLoops();
-        return View(loop);
+        return View(model);
     }
-    
-    [HttpPost]
-    public IActionResult DeleteLoop(int id)
+
+    public async Task<IActionResult> Delete(int id)
     {
-        _loopRepository.DeleteLoop(id);
-        ViewData["Loops"] = _loopRepository.GetAllLoops();
-        return View("LoopCreate");
+        var model = await _loopRepository.Get(id);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _loopRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

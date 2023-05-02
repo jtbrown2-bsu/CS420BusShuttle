@@ -1,6 +1,6 @@
 ﻿using Core.Models;
-using Microsoft.AspNetCore.Mvc;
 using Core.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace View.Controllers;
 
@@ -12,45 +12,85 @@ public class EntryController : Controller
     {
         _entryRepository = entryRepository;
     }
-    
-    [HttpGet]
-    public IActionResult Index()
+
+    public async Task<IActionResult> Index()
     {
-        return View(_entryRepository.Get());
+        var entries = await _entryRepository.Get();
+        return View(entries);
     }
 
-    [HttpGet]
-    public IActionResult GetByID(int id)
+    public IActionResult Create()
     {
-        var entry = _entryRepository.Get(id);
-        return View(entry);
+        return View();
     }
 
     [HttpPost]
-    public IActionResult AddEntry([Bind("Id, TimeStamp, Boarded, LeftBehind")]Entry entry)
+    public async Task<IActionResult> Create(Entry model)
     {
-        if (!ModelState.IsValid) return View(entry);
-        
-        _entryRepository.Add(entry);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            await _entryRepository.Add(model);
+            return RedirectToAction("Index");
+        }
 
+        return View(model);
     }
 
-    [HttpPut]
-    public IActionResult EditEntry(int id, Entry entry)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (!ModelState.IsValid) return View(entry);
-        _entryRepository.Update(id, entry);
-        return RedirectToAction(nameof(System.Index));
+        var model = await _entryRepository.Get(id);
 
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
     }
 
-    [HttpDelete]
-    public IActionResult DeleteEntry(int id)
+    [HttpPost]
+    public async Task<IActionResult> Edit(Entry model)
     {
-        _entryRepository.DeleteComment(id);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                await _entryRepository.Update(model);
+            }
+            catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
+        }
+
+        return View(model);
     }
 
+    public async Task<IActionResult> Delete(int id)
+    {
+        var model = await _entryRepository.Get(id);
 
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _entryRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
+    }
 }

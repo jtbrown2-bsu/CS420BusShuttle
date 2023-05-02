@@ -12,7 +12,7 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public async void Add(Stop stop)
+        public async Task Add(Stop stop)
         {
             await _dbContext.Stops.AddAsync(stop);
             await _dbContext.SaveChangesAsync();
@@ -28,7 +28,7 @@ namespace Core.Repositories
             return await _dbContext.Stops.ToListAsync();
         }
 
-        public async void Update(Stop stop)
+        public async Task Update(Stop stop)
         {
             var itemToUpdate = await _dbContext.Stops.FindAsync(stop.Id);
 
@@ -43,7 +43,7 @@ namespace Core.Repositories
             }
         }
 
-        public async void Delete(int id)
+        public async Task Delete(int id)
         {
             var itemToDelete = await _dbContext.Stops.FindAsync(id);
             if (itemToDelete == null)

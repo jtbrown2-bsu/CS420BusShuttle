@@ -1,6 +1,6 @@
-﻿using Core.Repositories;
+﻿using Core.Models;
+using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Route = Core.Models.Route;
 
 namespace View.Controllers;
 
@@ -12,47 +12,85 @@ public class RouteController : Controller
     {
         _routeRepository = routeRepository;
     }
-    public IActionResult Index()
+
+    public async Task<IActionResult> Index()
+    {
+        var routes = await _routeRepository.Get();
+        return View(routes);
+    }
+
+    public IActionResult Create()
     {
         return View();
     }
-    
-    [HttpGet]
-    public IActionResult GetAllRoutes()
+
+    [HttpPost]
+    public async Task<IActionResult> Create(Core.Models.Route model)
     {
-        return View(_routeRepository.GetAllRoutes());
+        if (ModelState.IsValid)
+        {
+            await _routeRepository.Add(model);
+            return RedirectToAction("Index");
+        }
+
+        return View(model);
     }
 
-    [HttpGet]
-    public IActionResult GetRouteById(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var route = _routeRepository.GetRoute(id);
-        return View(route);
+        var model = await _routeRepository.Get(id);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
     }
 
     [HttpPost]
-    public IActionResult AddRoute(Route route)
+    public async Task<IActionResult> Edit(Core.Models.Route model)
     {
-        if (!ModelState.IsValid) return View(route);
-        
-        _routeRepository.AddRoute(route);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                await _routeRepository.Update(model);
+            }
+            catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
+        }
 
+        return View(model);
     }
 
-    [HttpPut]
-    public IActionResult EditRoute(int id, Route route)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (!ModelState.IsValid) return View(route);
-        _routeRepository.UpdateRoute(id, route);
-        return RedirectToAction(nameof(System.Index));
+        var model = await _routeRepository.Get(id);
 
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
     }
 
-    [HttpDelete]
-    public IActionResult DeleteRoute(int id)
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
     {
-        _routeRepository.DeleteRoute(id);
-        return RedirectToAction(nameof(Index));
+        try
+        {
+            await _routeRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

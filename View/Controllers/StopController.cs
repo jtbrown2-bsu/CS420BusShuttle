@@ -6,67 +6,91 @@ namespace View.Controllers;
 
 public class StopController : Controller
 {
-   
     private readonly StopRepository _stopRepository;
 
     public StopController(StopRepository stopRepository)
     {
         _stopRepository = stopRepository;
     }
-    public IActionResult StopCreate()
+
+    public async Task<IActionResult> Index()
     {
-        ViewData["Stops"] = _stopRepository.GetAllStops();
+        var stops = await _stopRepository.Get();
+        return View(stops);
+    }
+
+    public IActionResult Create()
+    {
         return View();
     }
 
     [HttpPost]
-    public IActionResult StopCreate(Stop stop)
+    public async Task<IActionResult> Create(Stop model)
     {
         if (ModelState.IsValid)
         {
-            _stopRepository.AddStop(stop);
-            ViewData["Stops"] = _stopRepository.GetAllStops();
-            return View();
+            await _stopRepository.Add(model);
+            return RedirectToAction("Index");
         }
 
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View(stop);
-
-
+        return View(model);
     }
 
-    public IActionResult EditStop(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _stopRepository.GetStop(id);
+        var model = await _stopRepository.Get(id);
 
         if (model == null)
         {
             return NotFound();
-
         }
 
         return View(model);
     }
 
     [HttpPost]
-    public IActionResult EditStop(int id,Stop stop)
+    public async Task<IActionResult> Edit(Stop model)
     {
         if (ModelState.IsValid)
         {
-            _stopRepository.UpdateStop(id, stop);
-            ViewData["Loops"] = _stopRepository.GetAllStops();
-            return View("StopCreate");
+            try
+            {
+                await _stopRepository.Update(model);
+            }
+            catch
+            {
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View(stop);
-      }
+        return View(model);
+    }
 
-    [HttpPost]
-    public IActionResult DeleteBus(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _stopRepository.DeleteStop(id);
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View("StopCreate");
+        var model = await _stopRepository.Get(id);
+
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _stopRepository.Delete(id);
+        }
+        catch
+        {
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

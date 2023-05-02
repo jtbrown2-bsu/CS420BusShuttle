@@ -12,7 +12,7 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public async void Add(Route route)
+        public async Task Add(Route route)
         {
             await _dbContext.Routes.AddAsync(route);
             await _dbContext.SaveChangesAsync();
@@ -28,7 +28,7 @@ namespace Core.Repositories
             return await _dbContext.Routes.ToListAsync();
         }
 
-        public async void Update(Route route)
+        public async Task Update(Route route)
         {
             var itemToUpdate = await _dbContext.Routes.FindAsync(route.Id);
 
@@ -43,7 +43,7 @@ namespace Core.Repositories
             }
         }
 
-        public async void Delete(int id)
+        public async Task Delete(int id)
         {
             var itemToDelete = await _dbContext.Routes.FindAsync(id);
             if (itemToDelete == null)

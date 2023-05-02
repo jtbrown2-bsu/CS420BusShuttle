@@ -12,7 +12,7 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public async void Add(Bus bus)
+        public async Task Add(Bus bus)
         {
             await _dbContext.Buses.AddAsync(bus);
             await _dbContext.SaveChangesAsync();
@@ -28,7 +28,7 @@ namespace Core.Repositories
             return await _dbContext.Buses.ToListAsync();
         }
 
-        public async void Update(Bus bus)
+        public async Task Update(Bus bus)
         {
             var itemToUpdate = await _dbContext.Buses.FindAsync(bus.Id);
 
@@ -43,7 +43,7 @@ namespace Core.Repositories
             }
         }
 
-        public async void Delete(int id)
+        public async Task Delete(int id)
         {
             var itemToDelete = await _dbContext.Buses.FindAsync(id);
             if (itemToDelete == null)
