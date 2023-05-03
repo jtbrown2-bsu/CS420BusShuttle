@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Security.Claims;
 using View.Models;
 
@@ -71,9 +72,98 @@ public class EntryController : Controller
         return viewbagSelect;
     }
 
-    public async Task<IActionResult> Index()
+    private async Task<List<SelectListItem>> GetAvailableStops()
     {
+        var stops = await _stopRepository.Get();
+        var viewbagSelect = new List<SelectListItem>();
+        foreach (var stop in stops)
+        {
+            viewbagSelect.Add(new SelectListItem
+            {
+                Text = stop.Name,
+                Value = stop.Id.ToString()
+            });
+        }
+        return viewbagSelect;
+    }
+
+    private async Task<List<SelectListItem>> GetAvailableDrivers()
+    {
+        var drivers = _userManager.Users.ToList();
+        var viewbagSelect = new List<SelectListItem>();
+        foreach (var driver in drivers)
+        {
+            viewbagSelect.Add(new SelectListItem
+            {
+                Text = driver.FirstName + " " + driver.LastName,
+                Value = driver.Id
+            });
+        }
+        return viewbagSelect;
+    }
+
+    public async Task<IActionResult> Index(string loopId, string busId, string stopId, string driverId, string day)
+    {
+        var loops = await GetAvailableLoops();
+        loops.Insert(0, new SelectListItem
+        {
+            Text = "",
+            Value = ""
+        });
+        ViewBag.AvailableLoops = loops;
+
+        var busses = await GetAvailableBusses();
+        busses.Insert(0, new SelectListItem
+        {
+            Text = "",
+            Value = ""
+        });
+        ViewBag.AvailableBusses = busses;
+
+        var stops = await GetAvailableStops();
+        stops.Insert(0, new SelectListItem
+        {
+            Text = "",
+            Value = ""
+        });
+        ViewBag.AvailableStops = stops;
+
+        var drivers = await GetAvailableDrivers();
+        drivers.Insert(0, new SelectListItem
+        {
+            Text = "",
+            Value = ""
+        });
+        ViewBag.AvailableDrivers = drivers;
+
         var entries = await _entryRepository.Get();
+
+        if (!string.IsNullOrEmpty(loopId))
+        {
+            entries = entries.Where(e => e.LoopId == int.Parse(loopId)).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(busId))
+        {
+            entries = entries.Where(e => e.BusId == int.Parse(busId)).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(stopId))
+        {
+            entries = entries.Where(e => e.StopId == int.Parse(stopId)).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(driverId))
+        {
+            entries = entries.Where(e => e.DriverId == driverId).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(day))
+        {
+            entries = entries.Where(e => e.Timestamp.Date.Equals(DateTime.Parse(day).Date)).ToList();
+        }
+
+
         return View(entries);
     }
 
@@ -140,17 +230,44 @@ public class EntryController : Controller
             return NotFound();
         }
 
-        return View(model);
+        ViewBag.AvailableLoops = await GetAvailableLoops();
+        ViewBag.AvailableBusses = await GetAvailableBusses();
+        ViewBag.AvailableStops = await GetAvailableStops();
+
+        var viewModel = new EntryEditViewModel
+        {
+            Id = model.Id,
+            Boarded = model.Boarded,
+            LeftBehind = model.LeftBehind,
+            BusId = model.BusId,
+            StopId = model.StopId,
+            LoopId = model.LoopId,
+            Time = TimeOnly.FromDateTime(model.Timestamp),
+            Date = DateOnly.FromDateTime(model.Timestamp)
+        };
+
+
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Entry model)
+    public async Task<IActionResult> Edit(EntryEditViewModel model)
     {
         if (ModelState.IsValid)
         {
+            var route = new Entry
+            {
+                Id = model.Id,
+                Boarded = model.Boarded,
+                LeftBehind = model.LeftBehind,
+                BusId = model.BusId,
+                StopId = model.StopId,
+                LoopId = model.LoopId,
+                Timestamp = model.Date.ToDateTime(model.Time),
+            };
             try
             {
-                await _entryRepository.Update(model);
+                await _entryRepository.Update(route);
             }
             catch
             {
@@ -170,6 +287,8 @@ public class EntryController : Controller
         {
             return NotFound();
         }
+
+        ViewBag.Time = model.Timestamp.ToString("dd MMMM yyyy HH:mm:ss");
 
         return View(model);
     }

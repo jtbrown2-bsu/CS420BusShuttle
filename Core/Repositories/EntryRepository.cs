@@ -39,11 +39,17 @@ public class EntryRepository : IEntryRepository
 
     public async Task Update(Entry entry)
     {
-        var itemToUpdate = await _dbContext.Entries.FindAsync(entry);
+        var itemToUpdate = await _dbContext.Entries.FindAsync(entry.Id);
 
         if (itemToUpdate != null)
         {
-            _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(entry);
+            itemToUpdate.Boarded = entry.Boarded;
+            itemToUpdate.Timestamp = entry.Timestamp;
+            itemToUpdate.LeftBehind = entry.LeftBehind;
+            itemToUpdate.LoopId = entry.LoopId;
+            itemToUpdate.BusId = entry.BusId;
+            itemToUpdate.StopId = entry.StopId;
+
             await _dbContext.SaveChangesAsync();
         }
         else

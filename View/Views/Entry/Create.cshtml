@@ -13,7 +13,7 @@
     }
     else
     {
-        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalCenterTitle" aria-hidden="true">
+        <div style="font-size: 1.5rem" class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -28,34 +28,43 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mx-auto">
-            <form asp-action="StartDriving">
+        <div class="col-md-4 mx-auto" style="font-size: 2rem;width: 100%;">
+            <form asp-action="StartDriving" style="width: 100%;">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="LoopId" />
                 <input type="hidden" asp-for="BusId" />
                 <div class="form-group">
                     <label asp-for="StopId" class="control-label">Stop</label>
-                    <select id="stops" asp-for="StopId" class="form-control" asp-items="ViewBag.AvailableStops"></select>
+                    <select id="stops" asp-for="StopId" class="form-select form-select-lg" asp-items="ViewBag.AvailableStops" style="font-size: 2rem;"></select>
                 </div>
                 <div class="form-group">
-                    <label asp-for="Boarded" class="control-label"></label>
-                    <input id="boarded" asp-for="Boarded" class="form-control" />
-                    <span asp-validation-for="Boarded" class="text-danger"></span>
+                    <div class="d-flex p-2" style="gap: 20px; align-items: center; text-align: center;">
+                        <button type="button" data-change="boarded" class="dec btn btn-lg btn-primary">-</button>
+                        <label asp-for="Boarded" class="control-label"></label>
+                        <input id="boarded" asp-for="Boarded" class="form-control input-lg" style="font-size: 2rem;" />
+                        <span asp-validation-for="Boarded" class="text-danger"></span>
+                        <button type="button" data-change="boarded" class="inc btn btn-lg btn-primary">+</button>
+                    </div>
+                    
                 </div>
                 <div class="form-group">
-                    <label asp-for="LeftBehind" class="control-label">Left Behind</label>
-                    <input id="leftbehind" asp-for="LeftBehind" class="form-control" />
-                    <span asp-validation-for="LeftBehind" class="text-danger"></span>
+                    <div class="d-flex p-2" style="gap: 20px; align-items: center; text-align: center;">
+                        <button type="button" data-change="leftbehind" class="dec btn btn-lg btn-primary">-</button>
+                        <label asp-for="LeftBehind" class="control-label input-lg">Left Behind</label>
+                        <input id="leftbehind" asp-for="LeftBehind" class="form-control input-lg" style="font-size: 2rem;" />
+                        <span asp-validation-for="LeftBehind" class="text-danger"></span>
+                        <button type="button" data-change="leftbehind" class="inc btn btn-lg btn-primary">+</button>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-top: 20px">
-                    <input type="submit" value="Submit" class="btn btn-primary" />
+                <div class="form-group text-center" style="margin-top: 20px">
+                    <input type="submit" value="Submit" class="btn btn-lg btn-primary" />
                 </div>
             </form>
         </div>
     }
 </div>
 <div class="mx-auto text-center" style="margin-top: 20px">
-    <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Finish Driving</a>
+    <a class="btn btn-lg btn-secondary" asp-controller="Home" asp-action="Index">Finish Driving</a>
 </div>
 
 @section Scripts {
@@ -64,6 +73,20 @@
     }
     <script>
         $(document).ready(function () {
+            $(".inc").click(function () {
+                let valueToChange = $(this).data("change");
+                let inputToChange = $("#" + valueToChange);
+                let value = parseInt(inputToChange.val());
+                inputToChange.val(value + 1)
+            });
+
+            $(".dec").click(function () {
+                let valueToChange = $(this).data("change");
+                let inputToChange = $("#" + valueToChange);
+                let value = parseInt(inputToChange.val());
+                inputToChange.val(value - 1)
+            });
+
             $("form").submit(function (event) {
                 event.preventDefault();
                 $.post("/Entry/Create", $(this).serialize(), function () {
