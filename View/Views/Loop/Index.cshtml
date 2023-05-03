@@ -40,12 +40,12 @@
 
     <div class="form-group">
         <label for="loopId" class="control-label">Loop:</label>
-        <select style="margin-bottom: 20px;" id="loopId" name="loopId" class="form-select" asp-items="ViewBag.AvailableLoops"></select>
+        <select onchange="this.form.submit()" style="margin-bottom: 20px;" id="loopId" name="loopId" class="form-select" asp-items="ViewBag.AvailableLoops"></select>
     </div>
 
     <div class="form-group form-check">
         <label class="form-check-label">
-            <input class="form-check-input" id="filterByVisits" name="filterByVisits" /> Show Only Top 5 Busiest Stops
+            <input type="radio" clclass="form-check-input" id="filterByVisits" name="filterByVisits" /> Show Only Top 5 Busiest Stops
         </label>
     </div>
 
