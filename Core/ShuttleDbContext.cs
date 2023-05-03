@@ -6,7 +6,7 @@ namespace Core
 {
     public class ShuttleDbContext : IdentityDbContext<Driver>
     {
-        public ShuttleDbContext()
+        public ShuttleDbContext(DbContextOptions<ShuttleDbContext> options) : base(options)
         {
 
         }
@@ -29,12 +29,6 @@ namespace Core
             modelBuilder.Entity<Entry>().Navigation(e => e.Loop).AutoInclude();
             modelBuilder.Entity<Entry>().Navigation(e => e.Route).AutoInclude();
             modelBuilder.Entity<Entry>().Navigation(e => e.Stop).AutoInclude();
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseInMemoryDatabase(databaseName: "MyDatabase")
-                .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
         }
     }
 }

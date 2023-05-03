@@ -3,12 +3,13 @@ using Core.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ShuttleDbContext>();
+builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseInMemoryDatabase("CS420Bus"));
 builder.Services.AddScoped<IBusRepository, BusRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 builder.Services.AddScoped<IEntryRepository, EntryRepository>();
