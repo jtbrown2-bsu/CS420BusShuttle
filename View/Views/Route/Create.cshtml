@@ -9,13 +9,16 @@
 <h4>Route</h4>
 <hr />
 <div class="row">
+    @if (ViewBag.AvailableLoops.Count < 1 || ViewBag.AvailableStops.Count < 1)
+    {
+        <p>You must have at least one Loop and Stop created to create a Route.</p>
+    } else {
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Order" class="control-label"></label>
-                <input asp-for="Order" class="form-control" />
-                <span asp-validation-for="Order" class="text-danger"></span>
+                <label asp-for="LoopId" class="control-label">Loop</label>
+                <select asp-for="LoopId" class ="form-control" asp-items="ViewBag.AvailableLoops"></select>
             </div>
             <div class="form-group">
                 <label asp-for="StopId" class="control-label">Stop</label>
@@ -26,6 +29,7 @@
             </div>
         </form>
     </div>
+    }
 </div>
 
 <div>

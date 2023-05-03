@@ -21,6 +21,8 @@ namespace Core
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Route>().Navigation(e => e.Stop).AutoInclude();
+            modelBuilder.Entity<Route>().Navigation(e => e.Loop).AutoInclude();
+            modelBuilder.Entity<Loop>().Navigation(e => e.Routes).AutoInclude();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

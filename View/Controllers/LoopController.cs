@@ -1,6 +1,7 @@
 ﻿using Core.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using View.Models;
 
 namespace View.Controllers;
 
@@ -21,15 +22,19 @@ public class LoopController : Controller
 
     public IActionResult Create()
     {
-        return View();
+        return View(new LoopViewModel());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Loop model)
+    public async Task<IActionResult> Create(LoopViewModel model)
     {
         if (ModelState.IsValid)
         {
-            await _loopRepository.Add(model);
+            var loop = new Loop
+            {
+                Name = model.Name
+            };
+            await _loopRepository.Add(loop);
             return RedirectToAction("Index");
         }
 
@@ -45,17 +50,28 @@ public class LoopController : Controller
             return NotFound();
         }
 
-        return View(model);
+        var viewModel = new LoopViewModel
+        {
+            Id = model.Id,
+            Name = model.Name,
+        };
+
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Loop model)
+    public async Task<IActionResult> Edit(LoopViewModel model)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                await _loopRepository.Update(model);
+                var loop = new Loop
+                {
+                    Id = model.Id,
+                    Name = model.Name
+                };
+                await _loopRepository.Update(loop);
             }
             catch
             {

@@ -10,6 +10,7 @@ namespace Core.Repositories
         Task<List<Route>> Get();
         Task<Route> Get(int routeId);
         Task Update(Route route);
+        Task SwapOrders(int currentId, int updatedId);
     }
 
     public class RouteRepository : IRouteRepository
@@ -63,6 +64,26 @@ namespace Core.Repositories
             _dbContext.Routes.Remove(itemToDelete);
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task SwapOrders(int currentId, int updatedId)
+        {
+            var currentRoute = await _dbContext.Routes.FindAsync(currentId);
+            var updatedRoute = await _dbContext.Routes.FindAsync(updatedId);
+
+            if (currentRoute != null && updatedRoute != null)
+            {
+                var currentOrder = currentRoute.Order;
+                var updatedOrder = updatedRoute.Order;
+
+                currentRoute.Order = updatedOrder;
+                updatedRoute.Order = currentOrder;
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("No route found.");
+            }
         }
     }
 }

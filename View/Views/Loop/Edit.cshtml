@@ -1,4 +1,4 @@
-﻿@model View.Models.RouteEditViewModel
+﻿@model View.Models.LoopViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -6,19 +6,17 @@
 
 <h1>Edit</h1>
 
-<h4>Route</h4>
+<h4>Loop</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="LoopId" />
-            <input type="hidden" asp-for="Order" />
             <div class="form-group">
-                <label asp-for="StopId" class="control-label">Stop</label>
-                <select asp-for="StopId" class="form-control" asp-items="ViewBag.AvailableStops"></select>
-                <span asp-validation-for="StopId" class="text-danger"></span>
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

@@ -2,6 +2,7 @@
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using View.Models;
 
@@ -11,11 +12,13 @@ public class RouteController : Controller
 {
     private readonly IRouteRepository _routeRepository;
     private readonly IStopRepository _stopRepository;
+    private readonly ILoopRepository _loopRepository;
 
-    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository)
+    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository, ILoopRepository loopRepository)
     {
         _routeRepository = routeRepository;
         _stopRepository = stopRepository;
+        _loopRepository = loopRepository;
     }
 
     private async Task<List<SelectListItem>> GetAvailableStops()
@@ -33,16 +36,48 @@ public class RouteController : Controller
         return viewbagSelect;
     }
 
-    public async Task<IActionResult> Index()
+    private async Task<List<SelectListItem>> GetAvailableLoops()
     {
+        var loops = await _loopRepository.Get();
+        var viewbagSelect = new List<SelectListItem>();
+        foreach (var loop in loops)
+        {
+            viewbagSelect.Add(new SelectListItem
+            {
+                Text = loop.Name,
+                Value = loop.Id.ToString()
+            });
+        }
+        return viewbagSelect;
+    }
+
+    public async Task<IActionResult> Index(string loopId)
+    {
+        var loops = await GetAvailableLoops();
+        var loopIds = loops.Select(l => l.Value);
+        ViewBag.AvailableLoops = loops;
+            
         var routes = await _routeRepository.Get();
-        return View(routes);
+        if (!loopIds.Contains(loopId))
+        {
+            var defaultId = "0";
+            if(loopIds.Any())
+            {
+                defaultId = loopIds.ToList().First();
+            }
+            
+            return View(routes.Where(r => r.LoopId == int.Parse(defaultId)).OrderBy(r => r.Order));
+        }
+        loops.Where(l => l.Value == loopId).First().Selected = true;
+        ViewBag.AvailableLoops = loops;
+        return View(routes.Where(r => r.LoopId == int.Parse(loopId)).OrderBy(r => r.Order));
     }
 
     public async Task<IActionResult> Create()
     {
         ViewBag.AvailableStops = await GetAvailableStops();
-        
+        ViewBag.AvailableLoops = await GetAvailableLoops();
+
         return View(new RouteViewModel());
     }
 
@@ -51,10 +86,12 @@ public class RouteController : Controller
     {
         if (ModelState.IsValid)
         {
+            var routeCount = (await _loopRepository.Get(model.LoopId)).Routes.Count;
             var route = new Core.Models.Route
             {
-                Order = model.Order,
+                Order = routeCount + 1,
                 StopId = model.StopId,
+                LoopId = model.LoopId
             };
             await _routeRepository.Add(route);
             return RedirectToAction("Index");
@@ -74,11 +111,12 @@ public class RouteController : Controller
 
         ViewBag.AvailableStops = await GetAvailableStops();
 
-        var viewModel = new RouteViewModel
+        var viewModel = new RouteEditViewModel
         {
             Id = model.Id,
             Order = model.Order,
-            StopId = model.StopId
+            StopId = model.StopId,
+            LoopId = model.LoopId
         };
 
 
@@ -86,7 +124,7 @@ public class RouteController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(RouteViewModel model)
+    public async Task<IActionResult> Edit(RouteEditViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -95,6 +133,7 @@ public class RouteController : Controller
                 Id = model.Id,
                 Order = model.Order,
                 StopId = model.StopId,
+                LoopId = model.LoopId
             };
             try
             {
@@ -135,5 +174,12 @@ public class RouteController : Controller
         }
 
         return RedirectToAction("Index");
+    }
+
+    [HttpPost, ActionName("SwapOrders")]
+    public async Task<IActionResult> SwapOrders(int currentId, int updatedId)
+    {
+        await _routeRepository.SwapOrders(currentId, updatedId);
+        return Ok();
     }
 }

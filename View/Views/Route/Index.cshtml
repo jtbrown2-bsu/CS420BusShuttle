@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    <link rel="stylesheet" href="~/css/route_index.css" />
 }
 
 <h1>Index</h1>
@@ -9,11 +10,17 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+@using (Html.BeginForm("Index", "Route", FormMethod.Get))
+{
+    <label for="LoopId" class="control-label">Loop:</label>
+    <select onchange="this.form.submit()" id="LoopId" name="LoopId" class="form-control" asp-items="ViewBag.AvailableLoops"></select>
+}
 <table class="table">
     <thead>
         <tr>
+            <th></th>
             <th>
-                @Html.DisplayNameFor(model => model.Order)
+                Loop Name
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Stop)
@@ -22,10 +29,17 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            int i = 1;
+        }
 @foreach (var item in Model) {
-        <tr>
+            <tr data-routeid="@item.Id">
             <td>
-                @Html.DisplayFor(modelItem => item.Order)
+                <button class="btn btn-primary" id="up">Move Up</button>
+                <button class="btn btn-primary" id="down">Move Down</button>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Loop.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Stop.Name)
@@ -36,6 +50,34 @@
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
+            i++;
 }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#up,#down").click(function () {
+                let row = $(this).parents("tr:first");
+                let currentId = row.data('routeid');
+                let updatedRow;
+                if ($(this).is("#up")) {
+                    updatedRow = row.prev();
+                    row.insertBefore(updatedRow);
+                } else {
+                    updatedRow = row.next();
+                    row.insertAfter(updatedRow);
+                }
+                let updatedId = updatedRow.data('routeid');
+                updateOrder(currentId, updatedId);
+            })
+            function updateOrder(currentId, updatedId) {
+                $.post("/Route/SwapOrders", { currentId: currentId, updatedId: updatedId })
+                .fail(function (response) {
+                    console.error("Error while updating route order:", response);
+                });
+            }
+        });
+    </script>
+}
