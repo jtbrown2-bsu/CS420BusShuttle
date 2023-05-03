@@ -1,17 +1,20 @@
 ﻿using Core.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using View.Models;
 
 namespace View.Controllers;
-
+[Authorize(Policy = "ManagerOnly")]
 public class DriverController : Controller
 {
     private readonly IDriverRepository _driverRepository;
+    private readonly ILogger<BusController> _logger;
 
-    public DriverController(IDriverRepository driverRepository)
+    public DriverController(IDriverRepository driverRepository, ILogger<BusController> logger)
     {
         _driverRepository = driverRepository;
+        _logger = logger;
     }
 
     public async Task<IActionResult> Index()
@@ -31,6 +34,7 @@ public class DriverController : Controller
 
         if (model == null)
         {
+            _logger.LogWarning("Driver to update not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -58,9 +62,11 @@ public class DriverController : Controller
                     LastName = model.LastName
                 };
                 await _driverRepository.Update(driver);
+                _logger.LogInformation("Updated driver with ID {id} at {time}.", model.Id, DateTime.Now);
             }
             catch
             {
+                _logger.LogError("Updating driver with ID {id} failed at {time}.", model.Id, DateTime.Now);
                 return NotFound();
             }
             return RedirectToAction("Index");
@@ -75,6 +81,7 @@ public class DriverController : Controller
 
         if (model == null)
         {
+            _logger.LogWarning("Driver to delete not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -87,9 +94,11 @@ public class DriverController : Controller
         try
         {
             await _driverRepository.Delete(id);
+            _logger.LogInformation("Deleted driver with ID {id} at {time}.", id, DateTime.Now);
         }
         catch
         {
+            _logger.LogError("Deleting driver with ID {id} failed at {time}.", id, DateTime.Now);
             return NotFound();
         }
 

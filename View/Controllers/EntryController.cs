@@ -16,15 +16,17 @@ public class EntryController : Controller
     private readonly IStopRepository _stopRepository;
     private readonly IBusRepository _busRepository;
     private readonly ILoopRepository _loopRepository;
+    private readonly ILogger<BusController> _logger;
     private readonly UserManager<Driver> _userManager;
 
-    public EntryController(IEntryRepository entryRepository, IStopRepository stopRepository, UserManager<Driver> userManager, IBusRepository busRepository, ILoopRepository loopRepository)
+    public EntryController(IEntryRepository entryRepository, IStopRepository stopRepository, UserManager<Driver> userManager, IBusRepository busRepository, ILoopRepository loopRepository, ILogger<BusController> logger)
     {
         _entryRepository = entryRepository;
         _stopRepository = stopRepository;
         _userManager = userManager;
         _busRepository = busRepository;
         _loopRepository = loopRepository;
+        _logger = logger;
     }
 
     private async Task<List<SelectListItem>> GetAvailableBusses()
@@ -101,7 +103,7 @@ public class EntryController : Controller
         }
         return viewbagSelect;
     }
-
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> Index(string loopId, string busId, string stopId, string driverId, string day)
     {
         var loops = await GetAvailableLoops();
@@ -167,6 +169,7 @@ public class EntryController : Controller
         return View(entries);
     }
 
+    [Authorize(Policy = "ActivatedOnly")]
     public async Task<IActionResult> StartDriving()
     {
         ViewBag.AvailableBusses = await GetAvailableBusses();
@@ -176,16 +179,18 @@ public class EntryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = "ActivatedOnly")]
     public async Task<IActionResult> StartDriving(EntryStartViewModel model)
     {
         if (ModelState.IsValid)
         {
             return RedirectToAction("Create", new {busId = model.BusId, loopId = model.LoopId});
         }
-
+        _logger.LogError("Failed entry start validation at {time}.", DateTime.Now);
         return View(model);
     }
 
+    [Authorize(Policy = "ActivatedOnly")]
     public async Task<IActionResult> Create(int busId, int loopId)
     {
         ViewBag.AvailableStops = await GetAvailableStops(loopId);
@@ -198,6 +203,7 @@ public class EntryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = "ActivatedOnly")]
     public async Task<IActionResult> Create(EntryViewModel model)
     {
         if (ModelState.IsValid)
@@ -215,18 +221,78 @@ public class EntryController : Controller
                 LeftBehind = model.LeftBehind,
                 Timestamp = DateTime.Now
             };
-            await _entryRepository.Add(entry);
+            try
+            {
+                await _entryRepository.Add(entry);
+                _logger.LogInformation("Entry {id} created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+            }
+            catch
+            {
+                _logger.LogError("Entry failed creation by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                return NotFound();
+            }
             return Ok();
         }
+        _logger.LogError("Failed entry create validation at {time}.", DateTime.Now);
         return View(model);
     }
 
+    [Authorize(Policy = "ManagerOnly")]
+    public async Task<IActionResult> Add()
+    {
+        ViewBag.AvailableLoops = await GetAvailableLoops();
+        ViewBag.AvailableBusses = await GetAvailableBusses();
+        ViewBag.AvailableStops = await GetAvailableStops();
+        ViewBag.AvailableDrivers= await GetAvailableDrivers();
+
+        var viewModel = new EntryAddViewModel
+        {
+        };
+
+
+        return View(viewModel);
+    }
+
+    [HttpPost]
+    [Authorize(Policy = "ManagerOnly")]
+    public async Task<IActionResult> Add(EntryAddViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var entry = new Entry
+            {
+                DriverId = model.DriverId,
+                Boarded = model.Boarded,
+                LeftBehind = model.LeftBehind,
+                BusId = model.BusId,
+                StopId = model.StopId,
+                LoopId = model.LoopId,
+                Timestamp = model.Date.ToDateTime(model.Time),
+            };
+            try
+            {
+                await _entryRepository.Add(entry);
+                _logger.LogInformation("Entry {id} created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+            }
+            catch
+            {
+                _logger.LogError("Entry failed creation by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                return NotFound();
+            }
+            return RedirectToAction("Index");
+        }
+
+        return View(model);
+    }
+
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> Edit(int id)
     {
         var model = await _entryRepository.Get(id);
 
         if (model == null)
         {
+            _logger.LogWarning("Failed to find entry with ID {id} validation at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -251,11 +317,12 @@ public class EntryController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> Edit(EntryEditViewModel model)
     {
         if (ModelState.IsValid)
         {
-            var route = new Entry
+            var entry = new Entry
             {
                 Id = model.Id,
                 Boarded = model.Boarded,
@@ -267,24 +334,28 @@ public class EntryController : Controller
             };
             try
             {
-                await _entryRepository.Update(route);
+                await _entryRepository.Update(entry);
+                _logger.LogInformation("Entry {id} updated to have driver {driver} on loop {loop} for stop {stop} on bus {bus} at timestamp {time} at time {timenow}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, entry.Timestamp, DateTime.Now);
             }
             catch
             {
+                _logger.LogError("Entry {id} failed to update to have driver {driver} on loop {loop} for stop {stop} on bus {bus} at timestamp {time} at time {timenow}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, entry.Timestamp, DateTime.Now);
                 return NotFound();
             }
             return RedirectToAction("Index");
         }
-
+        _logger.LogError("Failed entry edit validation at {time}.", DateTime.Now);
         return View(model);
     }
 
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> Delete(int id)
     {
         var model = await _entryRepository.Get(id);
 
         if (model == null)
         {
+            _logger.LogWarning("Entry to delete not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -294,14 +365,17 @@ public class EntryController : Controller
     }
 
     [HttpPost, ActionName("Delete")]
+    [Authorize(Policy = "ManagerOnly")]
     public async Task<IActionResult> DeletePost(int id)
     {
         try
         {
             await _entryRepository.Delete(id);
+            _logger.LogInformation("Deleted entry with ID {id} at {time}.", id, DateTime.Now);
         }
         catch
         {
+            _logger.LogError("Deleting entry with ID {id} failed at {time}.", id, DateTime.Now);
             return NotFound();
         }
 

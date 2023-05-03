@@ -1,5 +1,6 @@
 ﻿using Core.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -7,18 +8,20 @@ using Microsoft.EntityFrameworkCore;
 using View.Models;
 
 namespace View.Controllers;
-
+[Authorize(Policy = "ManagerOnly")]
 public class RouteController : Controller
 {
     private readonly IRouteRepository _routeRepository;
     private readonly IStopRepository _stopRepository;
     private readonly ILoopRepository _loopRepository;
+    private readonly ILogger<BusController> _logger;
 
-    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository, ILoopRepository loopRepository)
+    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository, ILoopRepository loopRepository, ILogger<BusController> logger)
     {
         _routeRepository = routeRepository;
         _stopRepository = stopRepository;
         _loopRepository = loopRepository;
+        _logger = logger;
     }
 
     private async Task<List<SelectListItem>> GetAvailableStops()
@@ -94,9 +97,10 @@ public class RouteController : Controller
                 LoopId = model.LoopId
             };
             await _routeRepository.Add(route);
+            _logger.LogInformation("Created new route with ID {id}, Order {order}, Stop {stop} at {time}.", model.Id, routeCount + 1, model.StopId, DateTime.Now);
             return RedirectToAction("Index");
         }
-
+        _logger.LogError("Failed route validation at {time}.", DateTime.Now);
         return View(model);
     }
 
@@ -106,6 +110,7 @@ public class RouteController : Controller
 
         if (model == null)
         {
+            _logger.LogWarning("Route to update not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -138,9 +143,11 @@ public class RouteController : Controller
             try
             {
                 await _routeRepository.Update(route);
+                _logger.LogInformation("Updated route with ID {id} at {time}.", model.Id, DateTime.Now);
             }
             catch
             {
+                _logger.LogError("Updating route with ID {id} failed at {time}.", model.Id, DateTime.Now);
                 return NotFound();
             }
             return RedirectToAction("Index");
@@ -155,6 +162,7 @@ public class RouteController : Controller
 
         if (model == null)
         {
+            _logger.LogWarning("Route to delete not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -167,9 +175,11 @@ public class RouteController : Controller
         try
         {
             await _routeRepository.Delete(id);
+            _logger.LogInformation("Deleted route with ID {id} at {time}.", id, DateTime.Now);
         }
         catch
         {
+            _logger.LogError("Deleting route with ID {id} failed at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -180,6 +190,7 @@ public class RouteController : Controller
     public async Task<IActionResult> SwapOrders(int currentId, int updatedId)
     {
         await _routeRepository.SwapOrders(currentId, updatedId);
+        _logger.LogInformation("Routes {id} and {anotherid} swapped order at {time}.", currentId, updatedId, DateTime.Now);
         return Ok();
     }
 }

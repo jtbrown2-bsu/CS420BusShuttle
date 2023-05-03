@@ -22,7 +22,7 @@ builder.Services.AddDefaultIdentity<Driver>()
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ManagersOnly", policy =>
+    options.AddPolicy("ManagerOnly", policy =>
         policy.RequireClaim("IsManager", "true"));
     options.AddPolicy("ActivatedOnly", policy =>
         policy.RequireClaim("IsActivated", "true"));

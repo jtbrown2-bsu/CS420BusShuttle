@@ -30,6 +30,7 @@
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                                 </li>
                                 var isManager = bool.Parse(User.FindFirst("IsManager")?.Value ?? "false");
+                                var isActivated = bool.Parse(User.FindFirst("IsActivated")?.Value ?? "false");
                                 if (isManager)
                                 {
                                     <li>
@@ -54,9 +55,12 @@
                                 <li>
                                     <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Log Out</a>
                                 </li>
-                                <li>
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Entry" asp-action="StartDriving">Start Driving</a>
-                                </li>
+                                if(isActivated && !isManager)
+                                {
+                                    <li>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Entry" asp-action="StartDriving">Start Driving</a>
+                                    </li>
+                                }
                             }
                             else
                             {

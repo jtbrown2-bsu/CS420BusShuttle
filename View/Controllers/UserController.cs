@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using View.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace View.Controllers
 {
@@ -10,11 +11,13 @@ namespace View.Controllers
     {
         private readonly UserManager<Driver> _userManager;
         private readonly SignInManager<Driver> _signInManager;
+        private readonly ILogger<BusController> _logger;
 
-        public UserController(UserManager<Driver> userManager, SignInManager<Driver> signInManager)
+        public UserController(UserManager<Driver> userManager, SignInManager<Driver> signInManager, ILogger<BusController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         public IActionResult Login()
@@ -30,9 +33,11 @@ namespace View.Controllers
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("Logging in user {email} succeeded at {time}.", model.Email, DateTime.Now);
                     return RedirectToAction("Index", "Home");
                 } else
                 {
+                    _logger.LogError("Logging in user {email} failed at {time}.", model.Email, DateTime.Now);
                     ModelState.AddModelError(string.Empty, "Invalid username or password.");
                 } 
             }
@@ -81,6 +86,10 @@ namespace View.Controllers
                     if (user.IsManager)
                     {
                         await _userManager.AddClaimAsync(user, new Claim("IsManager", "true"));
+                        _logger.LogInformation("Manager with email {email} created at {time}.", model.Email, DateTime.Now);
+                    } else
+                    {
+                        _logger.LogInformation("Non-manager with email {email} created at {time}.", model.Email, DateTime.Now);
                     }
 
                     await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
@@ -91,6 +100,7 @@ namespace View.Controllers
                 {
                     foreach (var error in result.Errors)
                     {
+                        _logger.LogError("Registering account with email {email} failed with error {error} at {time}.", model.Email, error.Description, DateTime.Now);
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
                 }
@@ -106,11 +116,13 @@ namespace View.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if(user == null)
             {
+                _logger.LogError("Activating user id {id} failed at {time}.", id, DateTime.Now);
                 throw new Exception("No user found.");
             }
             await _userManager.AddClaimAsync(user, new Claim("IsActivated", "true"));
             user.IsActivated = true;
             await _userManager.UpdateAsync(user);
+            _logger.LogInformation("Activating user id {id} succeeded at {time}.", id, DateTime.Now);
             return Ok();
         }
     }
