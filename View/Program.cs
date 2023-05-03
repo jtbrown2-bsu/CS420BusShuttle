@@ -1,6 +1,8 @@
 using Core;
+using Core.Models;
 using Core.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,23 @@ builder.Services.AddScoped<IEntryRepository, EntryRepository>();
 builder.Services.AddScoped<ILoopRepository, LoopRepository>();
 builder.Services.AddScoped<IRouteRepository, RouteRepository>();
 builder.Services.AddScoped<IStopRepository, StopRepository>();
+
+builder.Services.AddDefaultIdentity<Driver>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ShuttleDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManagersOnly", policy =>
+        policy.RequireClaim("IsManager", "true"));
+    options.AddPolicy("ActivatedOnly", policy =>
+        policy.RequireClaim("IsActivated", "true"));
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/User/Login";
+});
 
 var app = builder.Build();
 

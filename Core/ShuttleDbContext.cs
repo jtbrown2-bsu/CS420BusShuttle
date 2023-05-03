@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Core
 {
-    public class ShuttleDbContext : DbContext
+    public class ShuttleDbContext : IdentityDbContext<Driver>
     {
         public ShuttleDbContext()
         {
