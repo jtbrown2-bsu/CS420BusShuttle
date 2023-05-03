@@ -24,6 +24,11 @@ namespace Core
             modelBuilder.Entity<Route>().Navigation(e => e.Stop).AutoInclude();
             modelBuilder.Entity<Route>().Navigation(e => e.Loop).AutoInclude();
             modelBuilder.Entity<Loop>().Navigation(e => e.Routes).AutoInclude();
+            modelBuilder.Entity<Entry>().Navigation(e => e.Bus).AutoInclude();
+            modelBuilder.Entity<Entry>().Navigation(e => e.Driver).AutoInclude();
+            modelBuilder.Entity<Entry>().Navigation(e => e.Loop).AutoInclude();
+            modelBuilder.Entity<Entry>().Navigation(e => e.Route).AutoInclude();
+            modelBuilder.Entity<Entry>().Navigation(e => e.Stop).AutoInclude();
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

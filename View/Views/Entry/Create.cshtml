@@ -1,0 +1,97 @@
+﻿@model View.Models.EntryViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Start Driving</h1>
+<hr />
+<div class="row">
+    @if (ViewBag.AvailableStops.Count < 1)
+    {
+        <p>You must have at least one Stop created to start driving.</p>
+    }
+    else
+    {
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalCenterTitle">Entry Added</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="modal-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mx-auto">
+            <form asp-action="StartDriving">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="LoopId" />
+                <input type="hidden" asp-for="BusId" />
+                <div class="form-group">
+                    <label asp-for="StopId" class="control-label">Stop</label>
+                    <select id="stops" asp-for="StopId" class="form-control" asp-items="ViewBag.AvailableStops"></select>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Boarded" class="control-label"></label>
+                    <input id="boarded" asp-for="Boarded" class="form-control" />
+                    <span asp-validation-for="Boarded" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LeftBehind" class="control-label">Left Behind</label>
+                    <input id="leftbehind" asp-for="LeftBehind" class="form-control" />
+                    <span asp-validation-for="LeftBehind" class="text-danger"></span>
+                </div>
+                <div class="form-group" style="margin-top: 20px">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    }
+</div>
+<div class="mx-auto text-center" style="margin-top: 20px">
+    <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Finish Driving</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $("form").submit(function (event) {
+                event.preventDefault();
+                $.post("/Entry/Create", $(this).serialize(), function () {
+                    let stops = $("#stops");
+                    let successModal = $('#successModal');
+
+                    successModal.on('show.bs.modal', function (event) {
+                        let selectedOptionText = stops.find("option:selected").text();
+                        let modal = $(this)
+                        modal.find('.modal-body p').text("Successfully added an entry for " + selectedOptionText + ".");
+                    })
+                    successModal.modal('show')
+
+                    let currentIndex = stops.prop("selectedIndex");
+                    let numOptions = $("select option").length;
+                    let nextIndex = (currentIndex + 1) % numOptions;
+                    stops.prop("selectedIndex", nextIndex);
+                    $("#boarded").val(0);
+                    $("#leftbehind").val(0);
+
+                    setTimeout(function () {
+                        successModal.modal('hide')
+                    }, 3000);
+                })
+                .fail(function (response) {
+                    console.error("Error while submitting entry:", response);
+                });
+            });
+        });
+    </script>
+}
