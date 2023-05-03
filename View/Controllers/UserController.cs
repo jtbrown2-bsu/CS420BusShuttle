@@ -99,5 +99,19 @@ namespace View.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Activate(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if(user == null)
+            {
+                throw new Exception("No user found.");
+            }
+            await _userManager.AddClaimAsync(user, new Claim("IsActivated", "true"));
+            user.IsActivated = true;
+            await _userManager.UpdateAsync(user);
+            return Ok();
+        }
     }
 }

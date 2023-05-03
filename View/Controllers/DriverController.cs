@@ -1,6 +1,7 @@
 ﻿using Core.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using View.Models;
 
 namespace View.Controllers;
 
@@ -24,19 +25,7 @@ public class DriverController : Controller
         return View();
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(Driver model)
-    {
-        if (ModelState.IsValid)
-        {
-            await _driverRepository.Add(model);
-            return RedirectToAction("Index");
-        }
-
-        return View(model);
-    }
-
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(string id)
     {
         var model = await _driverRepository.Get(id);
 
@@ -45,17 +34,30 @@ public class DriverController : Controller
             return NotFound();
         }
 
-        return View(model);
+        var viewModel = new DriverViewModel
+        {
+            Id = model.Id,
+            FirstName = model.FirstName,
+            LastName = model.LastName
+        };
+
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Driver model)
+    public async Task<IActionResult> Edit(DriverViewModel model)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                await _driverRepository.Update(model);
+                var driver = new Driver
+                {
+                    Id = model.Id,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName
+                };
+                await _driverRepository.Update(driver);
             }
             catch
             {
@@ -67,7 +69,7 @@ public class DriverController : Controller
         return View(model);
     }
 
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(string id)
     {
         var model = await _driverRepository.Get(id);
 
@@ -80,7 +82,7 @@ public class DriverController : Controller
     }
 
     [HttpPost, ActionName("Delete")]
-    public async Task<IActionResult> DeletePost(int id)
+    public async Task<IActionResult> DeletePost(string id)
     {
         try
         {

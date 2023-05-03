@@ -23,7 +23,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Views\Driver\" />
+      <UpToDateCheckInput Remove="Views\Driver\Index.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Driver\Index.cshtml" />
     </ItemGroup>
 
 </Project>

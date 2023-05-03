@@ -6,9 +6,9 @@ namespace Core.Repositories
     public interface IDriverRepository
     {
         Task Add(Driver driver);
-        Task Delete(int id);
+        Task Delete(string id);
         Task<List<Driver>> Get();
-        Task<Driver> Get(int id);
+        Task<Driver> Get(string id);
         Task Update(Driver driver);
     }
 
@@ -27,7 +27,7 @@ namespace Core.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Driver> Get(int id)
+        public async Task<Driver> Get(string id)
         {
             return await _dbContext.Drivers.FindAsync(id);
         }
@@ -43,7 +43,8 @@ namespace Core.Repositories
 
             if (itemToUpdate != null)
             {
-                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(driver);
+                itemToUpdate.FirstName = driver.FirstName;
+                itemToUpdate.LastName = driver.LastName;
                 await _dbContext.SaveChangesAsync();
             }
             else
@@ -52,7 +53,7 @@ namespace Core.Repositories
             }
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(string id)
         {
             var itemToDelete = await _dbContext.Drivers.FindAsync(id);
             if (itemToDelete == null)

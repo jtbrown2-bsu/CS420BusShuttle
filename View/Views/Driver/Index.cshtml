@@ -1,0 +1,87 @@
+﻿@model IEnumerable<Core.Models.Driver>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                First Name
+            </th>
+            <th>
+                Last Name
+            </th>
+            <th>
+                Email
+            </th>
+            <th>
+                Activated
+            </th>
+            <th>
+                Manager
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-userid="@item.Id">
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayTextFor(modelItem => item.IsActivated)
+                </td>
+                <td>
+                    @Html.DisplayTextFor(modelItem => item.IsManager)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
+                    @if (!item.IsManager)
+                    {
+                        <span>|</span>
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                </td>
+                <td>
+                    @if(!item.IsActivated)
+                    {
+                        <button class="btn btn-primary" id="activate">Activate</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#activate").click(function () {
+                let row = $(this).parents("tr:first");
+                let currentId = row.data('userid');
+                let button = $(this);
+
+                $.post("/User/Activate", { id: currentId }, function() {
+                    row.find("td").eq(3).text("True");
+                    button.remove();
+                })
+                .fail(function (response) {
+                    console.error("Error while activating user:", response);
+                });
+            })
+        });
+    </script>
+}
