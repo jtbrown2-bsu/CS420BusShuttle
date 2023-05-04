@@ -1,52 +1,73 @@
 using Core.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Repositories;
 
-public class EntryRepository
+public interface IEntryRepository
+{
+    Task Add(Entry entry);
+    Task Delete(int id);
+    Task<List<Entry>> Get();
+    Task<Entry> Get(int id);
+    Task Update(Entry entry);
+}
+
+public class EntryRepository : IEntryRepository
 {
     private readonly ShuttleDbContext _dbContext;
-    
-    public EntryRepository(ShuttleDbContext dbContext) {
-            _dbContext = dbContext;
+
+    public EntryRepository(ShuttleDbContext dbContext)
+    {
+        _dbContext = dbContext;
     }
 
-        public Entry Get(int entryId)
+    public async Task<Entry> Get(int id)
+    {
+        return await _dbContext.Entries.FindAsync(id);
+    }
+
+    public async Task<List<Entry>> Get()
+    {
+        return await _dbContext.Entries.ToListAsync();
+    }
+
+    public async Task Add(Entry entry)
+    {
+        await _dbContext.Entries.AddAsync(entry);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task Update(Entry entry)
+    {
+        var itemToUpdate = await _dbContext.Entries.FindAsync(entry.Id);
+
+        if (itemToUpdate != null)
         {
-            return _dbContext.Entries.FirstOrDefault(c => c.Id == entryId);
+            itemToUpdate.Boarded = entry.Boarded;
+            itemToUpdate.Timestamp = entry.Timestamp;
+            itemToUpdate.LeftBehind = entry.LeftBehind;
+            itemToUpdate.LoopId = entry.LoopId;
+            itemToUpdate.BusId = entry.BusId;
+            itemToUpdate.StopId = entry.StopId;
+
+            await _dbContext.SaveChangesAsync();
+        }
+        else
+        {
+            throw new Exception("No entry found.");
+        }
+    }
+
+    public async Task Delete(int id)
+    {
+        var itemToDelete = await _dbContext.Entries.FindAsync(id);
+        if (itemToDelete == null)
+        {
+            throw new Exception("No entry found.");
         }
 
-        public List<Entry> Get()
-        {
-            var entries = _dbContext.Entries
-                .ToList();
-            return entries;
-        }
+        _dbContext.Entries.Remove(itemToDelete);
 
-        public void Add(Entry entry)
-        {
-            _dbContext.Entries.Add(entry);
-            _dbContext.SaveChanges();
-        }
-
-        public void Update(int entryId, Entry entry)
-        {
-            var entryToUpdate = _dbContext.Entries.Find(entryId);
-
-            if (entryToUpdate != null)
-            {
-                _dbContext.Entry(entryToUpdate).CurrentValues.SetValues(entry);
-                _dbContext.SaveChanges();
-            } else
-            {
-                throw new Exception("No entry found.");
-            }
-        }
-
-        public void DeleteComment(int entryId)
-        {
-            var entryToDelete = _dbContext.Entries.Find(entryId);
-            if (entryToDelete == null) return;
-            _dbContext.Entries.Remove(entryToDelete);
-            _dbContext.SaveChanges();
-        }
+        await _dbContext.SaveChangesAsync();
+    }
 }

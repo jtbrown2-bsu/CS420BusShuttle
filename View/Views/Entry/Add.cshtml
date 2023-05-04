@@ -1,0 +1,63 @@
+﻿@model View.Models.EntryAddViewModel
+
+@{
+    ViewData["Title"] = "Add";
+}
+
+<h1>Add Entry</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Add">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="BusId" class="control-label">Bus</label>
+                <select asp-for="BusId" class="form-control" asp-items="ViewBag.AvailableBusses"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="LoopId" class="control-label">Loop</label>
+                <select asp-for="LoopId" class="form-control" asp-items="ViewBag.AvailableLoops"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="StopId" class="control-label">Stop</label>
+                <select asp-for="StopId" class="form-control" asp-items="ViewBag.AvailableStops"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DriverId" class="control-label">Driver</label>
+                <select asp-for="DriverId" class="form-control" asp-items="ViewBag.AvailableDrivers"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Boarded" class="control-label"></label>
+                <input asp-for="Boarded" class="form-control" />
+                <span asp-validation-for="Boarded" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LeftBehind" class="control-label">Left Behind</label>
+                <input asp-for="LeftBehind" class="form-control" />
+                <span asp-validation-for="LeftBehind" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Time" class="control-label">Time</label>
+                <input type="time" asp-for="Time" class="form-control" />
+                <span asp-validation-for="Time" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Date" class="control-label">Date</label>
+                <input type="date" asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

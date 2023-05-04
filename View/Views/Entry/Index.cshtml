@@ -1,0 +1,156 @@
+﻿@model IEnumerable<Core.Models.Entry>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Entries</h1>
+<p>
+    <a asp-action="Add">Create New</a>
+</p>
+<h4>Filter By:</h4>
+@using (Html.BeginForm("Index", "Entry", FormMethod.Get))
+{
+    <div class="form-group">
+        <label for="LoopId" class="control-label">Loop:</label>
+        <select id="LoopId" name="LoopId" class="form-control" asp-items="ViewBag.AvailableLoops"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="BusId" class="control-label">Bus:</label>
+        <select id="BusId" name="BusId" class="form-control" asp-items="ViewBag.AvailableBusses"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="DriverId" class="control-label">Driver:</label>
+        <select id="DriverId" name="DriverId" class="form-control" asp-items="ViewBag.AvailableDrivers"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="StopId" class="control-label">Stop:</label>
+        <select id="StopId" name="StopId" class="form-control" asp-items="ViewBag.AvailableStops"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="Day" class="control-label">Day:</label>
+        <input type="date" id="Day" name="Day" class="form-control" />
+    </div>
+
+    <div class="form-group d-flex p-2" style="margin-top: 20px; gap: 20px;">
+        <button class="btn btn-primary" onclick="this.form.submit()">Filter</button>
+        <button type="button" class="btn btn-primary" id="export">Export</button>
+    </div>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Boarded)
+            </th>
+            <th>
+                Left Behind
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Stop)
+            </th>
+            <th>
+                Time
+            </th>
+            <th>
+                Date
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Loop)
+            </th>
+            <th>
+                Driver
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Bus)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Boarded)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LeftBehind)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Stop.Name)
+                </td>
+                <td>
+                    @Html.Raw(item.Timestamp.ToString("HH:mm"))
+                </td>
+                <td>
+                    @Html.Raw(item.Timestamp.ToString("d"))
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Loop.Name)
+                </td>
+                <td>
+                    @Html.Raw(item.Driver.FirstName + " " + item.Driver.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Bus.BusNumber)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            function tableToCSV() {
+                let csv_data = [];
+
+                var rows = document.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    let cols = rows[i].querySelectorAll('td,th');
+
+                    let csvrow = [];
+                    for (let j = 0; j < cols.length - 1; j++) {
+                        csvrow.push(cols[j].textContent.trim());
+                    }
+                    let rowData = csvrow.join(",");
+                    csv_data.push(rowData);
+                }
+                console.log(csv_data)
+                csv_data = csv_data.join('\n');
+                downloadCSVFile(csv_data);
+            }
+
+            function downloadCSVFile(csv_data) {
+                CSVFile = new Blob([csv_data], { type: "text/csv" });
+
+                let temp_link = document.createElement('a');
+
+                temp_link.download = "Entries.csv";
+                let url = window.URL.createObjectURL(CSVFile);
+                temp_link.href = url;
+
+                temp_link.style.display = "none";
+                document.body.appendChild(temp_link);
+
+                temp_link.click();
+                document.body.removeChild(temp_link);
+            }
+
+            $("#export").click(function () {
+                tableToCSV();
+            });
+        });
+    </script>
+    }

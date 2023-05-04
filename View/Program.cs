@@ -1,19 +1,43 @@
 using Core;
+using Core.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var folder = Environment.SpecialFolder.LocalApplicationData;
+var path = Environment.GetFolderPath(folder);
+var DbPath = Path.Join(path, "shuttle.db");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<BusRepository>();
-builder.Services.AddScoped<DriverRepository>();
-builder.Services.AddScoped<LoopRepository>();
-builder.Services.AddScoped<RouteRepository>();
-builder.Services.AddScoped<StopRepository>();
-builder.Services.AddScoped<EntryRepository>();
-builder.Services.AddDbContext<ShuttleDbContext>(options =>
-    options.UseInMemoryDatabase("TestDatabase"));
+//builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseInMemoryDatabase("CS420Bus"));
+builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseSqlite($"Data Source={DbPath}"));
+builder.Services.AddScoped<IBusRepository, BusRepository>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IEntryRepository, EntryRepository>();
+builder.Services.AddScoped<ILoopRepository, LoopRepository>();
+builder.Services.AddScoped<IRouteRepository, RouteRepository>();
+builder.Services.AddScoped<IStopRepository, StopRepository>();
+
+builder.Services.AddDefaultIdentity<Driver>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ShuttleDbContext>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManagerOnly", policy =>
+        policy.RequireClaim("IsManager", "true"));
+    options.AddPolicy("ActivatedOnly", policy =>
+        policy.RequireClaim("IsActivated", "true"));
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/User/Login";
+});
 
 var app = builder.Build();
 
@@ -32,8 +56,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+app.MapDefaultControllerRoute();
 
 app.Run();

@@ -1,0 +1,7 @@
+﻿tr:first-child #up {
+    display: none;
+}
+
+tr:last-child #down {
+    display: none;
+}

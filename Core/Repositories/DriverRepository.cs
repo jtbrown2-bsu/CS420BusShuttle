@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class DriverRepository
+    public interface IDriverRepository
+    {
+        Task Add(Driver driver);
+        Task Delete(string id);
+        Task<List<Driver>> Get();
+        Task<Driver> Get(string id);
+        Task Update(Driver driver);
+    }
+
+    public class DriverRepository : IDriverRepository
     {
         private readonly ShuttleDbContext _dbContext;
 
@@ -12,31 +21,31 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Driver AddDriver(Driver driver)
+        public async Task Add(Driver driver)
         {
-            _dbContext.Add(driver);
-            _dbContext.SaveChanges();
-            return driver;
+            await _dbContext.Drivers.AddAsync(driver);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Driver GetDriver(int id)
+        public async Task<Driver> Get(string id)
         {
-            return _dbContext.Drivers.Find(id);
+            return await _dbContext.Drivers.FindAsync(id);
         }
 
-        public IEnumerable<Driver> GetAllDrivers()
+        public async Task<List<Driver>> Get()
         {
-            return _dbContext.Set<Driver>().ToList();
+            return await _dbContext.Drivers.ToListAsync();
         }
 
-        public void UpdateDriver(int driverId, Driver driver)
+        public async Task Update(Driver driver)
         {
-            var driverToUpdate = _dbContext.Drivers.Find(driverId);
+            var itemToUpdate = await _dbContext.Drivers.FindAsync(driver.Id);
 
-            if (driverToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(driverToUpdate).CurrentValues.SetValues(driver);
-                _dbContext.SaveChanges();
+                itemToUpdate.FirstName = driver.FirstName;
+                itemToUpdate.LastName = driver.LastName;
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,15 +53,18 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteDriver(int id)
+        public async Task Delete(string id)
         {
-            Driver driver = _dbContext.Drivers.Find(id);
-            if (driver != null)
+            var itemToDelete = await _dbContext.Drivers.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Set<Driver>().Remove(driver);
-                _dbContext.SaveChanges();
+                throw new Exception("No driver found.");
             }
+
+            _dbContext.Drivers.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
-    
+
     }
 }

@@ -1,44 +1,52 @@
 ﻿using Core.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace View.Controllers;
-
+[Authorize(Policy = "ManagerOnly")]
 public class BusController : Controller
 {
-    private readonly BusRepository _busRepository;
+    private readonly IBusRepository _busRepository;
+    private readonly ILogger<BusController> _logger;
 
-    public BusController(BusRepository busRepository)
+    public BusController(IBusRepository busRepository, ILogger<BusController> logger)
     {
         _busRepository = busRepository;
+        _logger = logger;
     }
 
-    public IActionResult BusCreate()
+    public async Task<IActionResult> Index()
     {
-        ViewData["Buses"] = _busRepository.GetAllBusses();
+        var buses = await _busRepository.Get();
+        return View(buses);
+    }
+
+    public IActionResult Create()
+    {
         return View();
     }
 
     [HttpPost]
-    public IActionResult BusCreate(Bus model)
+    public async Task<IActionResult> Create(Bus model)
     {
         if (ModelState.IsValid)
         {
-            _busRepository.AddBus(model);
-            ViewData["Buses"] = _busRepository.GetAllBusses();
-            return View();
+            await _busRepository.Add(model);
+            _logger.LogInformation("Created new bus with ID {id}, Bus Number {number} at {time}.", model.Id, model.BusNumber, DateTime.Now);
+            return RedirectToAction("Index");
         }
-
-        ViewData["Buses"] = _busRepository.GetAllBusses();
+        _logger.LogError("Failed bus creation validation at {time}.", DateTime.Now);
         return View(model);
     }
 
-    public IActionResult EditBus(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _busRepository.GetBus(id);
+        var model = await _busRepository.Get(id);
 
         if (model == null)
         {
+            _logger.LogWarning("Bus to update not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
         }
 
@@ -46,24 +54,52 @@ public class BusController : Controller
     }
 
     [HttpPost]
-    public IActionResult EditBus(int id, Bus bus)
+    public async Task<IActionResult> Edit(Bus model)
     {
         if (ModelState.IsValid)
         {
-            _busRepository.UpdateBus(id, bus);
-            ViewData["Buses"] = _busRepository.GetAllBusses();
-            return View("BusCreate");
+            try
+            {
+                await _busRepository.Update(model);
+                _logger.LogInformation("Updated bus with ID {id} at {time}.", model.Id, DateTime.Now);
+            } catch
+            {
+                _logger.LogError("Updating bus with ID {id} failed at {time}.", model.Id, DateTime.Now);
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Buses"] = _busRepository.GetAllBusses();
-        return View(bus);
+        return View(model);
     }
 
-    [HttpPost]
-    public IActionResult DeleteBus(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _busRepository.DeleteBus(id);
-        ViewData["Buses"] = _busRepository.GetAllBusses();
-        return View("BusCreate");
+        var model = await _busRepository.Get(id);
+
+        if (model == null)
+        {
+            _logger.LogWarning("Bus to delete not found with ID {id} at {time}.", id, DateTime.Now);
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            await _busRepository.Delete(id);
+            _logger.LogInformation("Deleted bus with ID {id} at {time}.", id, DateTime.Now);
+        }
+        catch
+        {
+            _logger.LogError("Deleting bus with ID {id} failed at {time}.", id, DateTime.Now);
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }

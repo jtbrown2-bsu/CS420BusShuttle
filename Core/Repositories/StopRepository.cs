@@ -3,7 +3,16 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class StopRepository
+    public interface IStopRepository
+    {
+        Task Add(Stop stop);
+        Task Delete(int id);
+        Task<List<Stop>> Get();
+        Task<Stop> Get(int id);
+        Task Update(Stop stop);
+    }
+
+    public class StopRepository : IStopRepository
     {
         private readonly ShuttleDbContext _dbContext;
 
@@ -12,31 +21,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Stop AddStop(Stop stop)
+        public async Task Add(Stop stop)
         {
-            _dbContext.Add(stop);
-            _dbContext.SaveChanges();
-            return stop;
+            await _dbContext.Stops.AddAsync(stop);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Stop GetStop(int stopId)
+        public async Task<Stop> Get(int id)
         {
-            return _dbContext.Stops.Find(stopId);
+            return await _dbContext.Stops.FindAsync(id);
         }
 
-        public IEnumerable<Stop> GetAllStops()
+        public async Task<List<Stop>> Get()
         {
-            return _dbContext.Stops.ToList();
+            return await _dbContext.Stops.ToListAsync();
         }
 
-        public void UpdateStop(int stopId, Stop stop)
+        public async Task Update(Stop stop)
         {
-            var stopToUpdate = _dbContext.Stops.Find(stopId);
+            var itemToUpdate = await _dbContext.Stops.FindAsync(stop.Id);
 
-            if (stopToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(stopToUpdate).CurrentValues.SetValues(stop);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(stop);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,14 +52,17 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteStop(int stopId)
+        public async Task Delete(int id)
         {
-            Stop stop = _dbContext.Stops.Find(stopId);
-            if (stop != null)
+            var itemToDelete = await _dbContext.Stops.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Stops.Remove(stop);
-                _dbContext.SaveChanges();
+                throw new Exception("No stop found.");
             }
+
+            _dbContext.Stops.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

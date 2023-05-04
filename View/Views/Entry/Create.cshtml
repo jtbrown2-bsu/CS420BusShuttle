@@ -1,0 +1,120 @@
+﻿@model View.Models.EntryViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create Entries</h1>
+<hr />
+<div class="row">
+    @if (ViewBag.AvailableStops.Count < 1)
+    {
+        <p>You must have at least one Stop created to start driving.</p>
+    }
+    else
+    {
+        <div style="font-size: 1.5rem" class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalCenterTitle">Entry Added</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="modal-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mx-auto" style="font-size: 2rem;width: 100%;">
+            <form asp-action="StartDriving" style="width: 100%;">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="LoopId" />
+                <input type="hidden" asp-for="BusId" />
+                <div class="form-group">
+                    <label asp-for="StopId" class="control-label">Stop</label>
+                    <select id="stops" asp-for="StopId" class="form-select form-select-lg" asp-items="ViewBag.AvailableStops" style="font-size: 2rem;"></select>
+                </div>
+                <div class="form-group">
+                    <div class="d-flex p-2" style="gap: 20px; align-items: center; text-align: center;">
+                        <button type="button" data-change="boarded" class="dec btn btn-lg btn-primary">-</button>
+                        <label asp-for="Boarded" class="control-label"></label>
+                        <input id="boarded" asp-for="Boarded" class="form-control input-lg" style="font-size: 2rem;" />
+                        <span asp-validation-for="Boarded" class="text-danger"></span>
+                        <button type="button" data-change="boarded" class="inc btn btn-lg btn-primary">+</button>
+                    </div>
+                    
+                </div>
+                <div class="form-group">
+                    <div class="d-flex p-2" style="gap: 20px; align-items: center; text-align: center;">
+                        <button type="button" data-change="leftbehind" class="dec btn btn-lg btn-primary">-</button>
+                        <label asp-for="LeftBehind" class="control-label input-lg">Left Behind</label>
+                        <input id="leftbehind" asp-for="LeftBehind" class="form-control input-lg" style="font-size: 2rem;" />
+                        <span asp-validation-for="LeftBehind" class="text-danger"></span>
+                        <button type="button" data-change="leftbehind" class="inc btn btn-lg btn-primary">+</button>
+                    </div>
+                </div>
+                <div class="form-group text-center" style="margin-top: 20px">
+                    <input type="submit" value="Submit" class="btn btn-lg btn-primary" />
+                </div>
+            </form>
+        </div>
+    }
+</div>
+<div class="mx-auto text-center" style="margin-top: 20px">
+    <a class="btn btn-lg btn-secondary" asp-controller="Home" asp-action="Index">Finish Driving</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $(".inc").click(function () {
+                let valueToChange = $(this).data("change");
+                let inputToChange = $("#" + valueToChange);
+                let value = parseInt(inputToChange.val());
+                inputToChange.val(value + 1)
+            });
+
+            $(".dec").click(function () {
+                let valueToChange = $(this).data("change");
+                let inputToChange = $("#" + valueToChange);
+                let value = parseInt(inputToChange.val());
+                inputToChange.val(value - 1)
+            });
+
+            $("form").submit(function (event) {
+                event.preventDefault();
+                $.post("/Entry/Create", $(this).serialize(), function () {
+                    let stops = $("#stops");
+                    let successModal = $('#successModal');
+
+                    successModal.on('show.bs.modal', function (event) {
+                        let selectedOptionText = stops.find("option:selected").text();
+                        let modal = $(this)
+                        modal.find('.modal-body p').text("Successfully added an entry for " + selectedOptionText + ".");
+                    })
+                    successModal.modal('show')
+
+                    let currentIndex = stops.prop("selectedIndex");
+                    let numOptions = $("select option").length;
+                    let nextIndex = (currentIndex + 1) % numOptions;
+                    stops.prop("selectedIndex", nextIndex);
+                    $("#boarded").val(0);
+                    $("#leftbehind").val(0);
+
+                    setTimeout(function () {
+                        successModal.modal('hide')
+                    }, 3000);
+                })
+                .fail(function (response) {
+                    console.error("Error while submitting entry:", response);
+                });
+            });
+        });
+    </script>
+}

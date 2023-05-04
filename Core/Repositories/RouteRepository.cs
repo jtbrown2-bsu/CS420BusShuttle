@@ -3,7 +3,17 @@ using Core.Models;
 
 namespace Core.Repositories
 {
-    public class RouteRepository
+    public interface IRouteRepository
+    {
+        Task Add(Route route);
+        Task Delete(int id);
+        Task<List<Route>> Get();
+        Task<Route> Get(int routeId);
+        Task Update(Route route);
+        Task SwapOrders(int currentId, int updatedId);
+    }
+
+    public class RouteRepository : IRouteRepository
     {
         private readonly ShuttleDbContext _dbContext;
 
@@ -12,31 +22,30 @@ namespace Core.Repositories
             _dbContext = dbContext;
         }
 
-        public Route AddRoute(Route route)
+        public async Task Add(Route route)
         {
-            _dbContext.Add(route);
-            _dbContext.SaveChanges();
-            return route;
+            await _dbContext.Routes.AddAsync(route);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Route GetRoute(int routeId)
+        public async Task<Route> Get(int routeId)
         {
-            return _dbContext.Routes.Find(routeId);
+            return await _dbContext.Routes.FindAsync(routeId);
         }
 
-        public IEnumerable<Route> GetAllRoutes()
+        public async Task<List<Route>> Get()
         {
-            return _dbContext.Routes.ToList();
+            return await _dbContext.Routes.ToListAsync();
         }
 
-        public void UpdateRoute(int routeId, Route route)
+        public async Task Update(Route route)
         {
-            var routeToUpdate = _dbContext.Routes.Find(routeId);
+            var itemToUpdate = await _dbContext.Routes.FindAsync(route.Id);
 
-            if (routeToUpdate != null)
+            if (itemToUpdate != null)
             {
-                _dbContext.Entry(routeToUpdate).CurrentValues.SetValues(route);
-                _dbContext.SaveChanges();
+                _dbContext.Entry(itemToUpdate).CurrentValues.SetValues(route);
+                await _dbContext.SaveChangesAsync();
             }
             else
             {
@@ -44,13 +53,36 @@ namespace Core.Repositories
             }
         }
 
-        public void DeleteRoute(int routeId)
+        public async Task Delete(int id)
         {
-            Route route = _dbContext.Routes.Find(routeId);
-            if (route != null)
+            var itemToDelete = await _dbContext.Routes.FindAsync(id);
+            if (itemToDelete == null)
             {
-                _dbContext.Routes.Remove(route);
-                _dbContext.SaveChanges();
+                throw new Exception("No route found.");
+            }
+
+            _dbContext.Routes.Remove(itemToDelete);
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task SwapOrders(int currentId, int updatedId)
+        {
+            var currentRoute = await _dbContext.Routes.FindAsync(currentId);
+            var updatedRoute = await _dbContext.Routes.FindAsync(updatedId);
+
+            if (currentRoute != null && updatedRoute != null)
+            {
+                var currentOrder = currentRoute.Order;
+                var updatedOrder = updatedRoute.Order;
+
+                currentRoute.Order = updatedOrder;
+                updatedRoute.Order = currentOrder;
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("No route found.");
             }
         }
     }

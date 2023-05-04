@@ -1,0 +1,40 @@
+﻿@model View.Models.RouteViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create Route</h1>
+
+<hr />
+<div class="row">
+    @if (ViewBag.AvailableLoops.Count < 1 || ViewBag.AvailableStops.Count < 1)
+    {
+        <p>You must have at least one Loop and Stop created to create a Route.</p>
+    } else {
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="LoopId" class="control-label">Loop</label>
+                <select asp-for="LoopId" class ="form-control" asp-items="ViewBag.AvailableLoops"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="StopId" class="control-label">Stop</label>
+                <select asp-for="StopId" class ="form-control" asp-items="ViewBag.AvailableStops"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+    }
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

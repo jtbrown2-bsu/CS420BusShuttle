@@ -1,72 +1,106 @@
 ﻿using Core.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace View.Controllers;
-
+[Authorize(Policy = "ManagerOnly")]
 public class StopController : Controller
 {
-   
-    private readonly StopRepository _stopRepository;
+    private readonly IStopRepository _stopRepository;
+    private readonly ILogger<StopController> _logger;
 
-    public StopController(StopRepository stopRepository)
+    public StopController(IStopRepository stopRepository, ILogger<StopController> logger)
     {
         _stopRepository = stopRepository;
+        _logger = logger;
     }
-    public IActionResult StopCreate()
+
+    public async Task<IActionResult> Index()
     {
-        ViewData["Stops"] = _stopRepository.GetAllStops();
+        var stops = await _stopRepository.Get();
+        return View(stops);
+    }
+
+    public IActionResult Create()
+    {
         return View();
     }
 
     [HttpPost]
-    public IActionResult StopCreate(Stop stop)
+    public async Task<IActionResult> Create(Stop model)
     {
         if (ModelState.IsValid)
         {
-            _stopRepository.AddStop(stop);
-            ViewData["Stops"] = _stopRepository.GetAllStops();
-            return View();
+            await _stopRepository.Add(model);
+            _logger.LogInformation("Created new stop with ID {id}, Name {name} at {time}.", model.Id, model.Name, DateTime.Now);
+            return RedirectToAction("Index");
         }
-
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View(stop);
-
-
+        _logger.LogError("Failed stop creation validation at {time}.", DateTime.Now);
+        return View(model);
     }
 
-    public IActionResult EditStop(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var model = _stopRepository.GetStop(id);
+        var model = await _stopRepository.Get(id);
 
         if (model == null)
         {
+            _logger.LogWarning("Stop to update not found with ID {id} at {time}.", id, DateTime.Now);
             return NotFound();
-
         }
 
         return View(model);
     }
 
     [HttpPost]
-    public IActionResult EditStop(int id,Stop stop)
+    public async Task<IActionResult> Edit(Stop model)
     {
         if (ModelState.IsValid)
         {
-            _stopRepository.UpdateStop(id, stop);
-            ViewData["Loops"] = _stopRepository.GetAllStops();
-            return View("StopCreate");
+            try
+            {
+                await _stopRepository.Update(model);
+                _logger.LogInformation("Updated stop with ID {id} at {time}.", model.Id, DateTime.Now);
+            }
+            catch
+            {
+                _logger.LogError("Updating stop with ID {id} failed at {time}.", model.Id, DateTime.Now);
+                return NotFound();
+            }
+            return RedirectToAction("Index");
         }
 
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View(stop);
-      }
+        return View(model);
+    }
 
-    [HttpPost]
-    public IActionResult DeleteBus(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _stopRepository.DeleteStop(id);
-        ViewData["Stops"] = _stopRepository.GetAllStops();
-        return View("StopCreate");
+        var model = await _stopRepository.Get(id);
+
+        if (model == null)
+        {
+            _logger.LogWarning("Stop to delete not found with ID {id} at {time}.", id, DateTime.Now);
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeletePost(int id)
+    {
+        try
+        {
+            _logger.LogInformation("Deleted stop with ID {id} at {time}.", id, DateTime.Now);
+            await _stopRepository.Delete(id);
+        }
+        catch
+        {
+            _logger.LogError("Deleting stop with ID {id} failed at {time}.", id, DateTime.Now);
+            return NotFound();
+        }
+
+        return RedirectToAction("Index");
     }
 }
