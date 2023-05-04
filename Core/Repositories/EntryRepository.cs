@@ -49,6 +49,7 @@ public class EntryRepository : IEntryRepository
             itemToUpdate.LoopId = entry.LoopId;
             itemToUpdate.BusId = entry.BusId;
             itemToUpdate.StopId = entry.StopId;
+            itemToUpdate.RouteId = entry.RouteId;
 
             await _dbContext.SaveChangesAsync();
         }

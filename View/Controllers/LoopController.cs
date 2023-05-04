@@ -53,23 +53,15 @@ public class LoopController : Controller
 
         if (!string.IsNullOrEmpty(filterByVisits))
         {
-            if(entries.Count > 1)
+            if(entries.Count < 1)
             {
                 stopsForMap = new List<Stop>();
             } else
             {
-                var stopsWithManyPeople = entries.OrderByDescending(e => e.Boarded).Select(e => e.StopId).Take(5).ToList();
-                _logger.LogInformation("Size of stops to filter {time}.", stopsWithManyPeople.Count);
-                var stopsToGoThrough = new List<Stop>();
-                foreach(var stop in stopsForMap)
-                {
-                    if (stopsWithManyPeople.Contains(stop.Id))
-                    {
-                        stopsToGoThrough.Add(stop);
-                    }
-                }
-                stopsForMap = stopsToGoThrough;
+                var stopsWithManyPeople = entries.OrderByDescending(e => e.Boarded).Select(e => e.Stop).Take(5).ToList();
+                stopsForMap = stopsWithManyPeople.Join(stopsForMap, s => s.Id, s2 => s2.Id, (s, s2) => s).ToList();
             }
+
         }
 
         ViewBag.StopsForMap = stopsForMap;

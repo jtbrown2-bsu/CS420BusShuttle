@@ -259,6 +259,19 @@ public class EntryController : Controller
     {
         if (ModelState.IsValid)
         {
+            int routeId;
+            try
+            {
+                routeId = (await _loopRepository.Get(model.LoopId)).Routes.Where(r => r.StopId == model.StopId).First().Id;
+            } catch
+            {
+                ModelState.AddModelError(string.Empty, "The stop selected must be part of the loop.");
+                ViewBag.AvailableLoops = await GetAvailableLoops();
+                ViewBag.AvailableBusses = await GetAvailableBusses();
+                ViewBag.AvailableStops = await GetAvailableStops();
+                ViewBag.AvailableDrivers = await GetAvailableDrivers();
+                return View(model);
+            }
             var entry = new Entry
             {
                 DriverId = model.DriverId,
@@ -267,6 +280,7 @@ public class EntryController : Controller
                 BusId = model.BusId,
                 StopId = model.StopId,
                 LoopId = model.LoopId,
+                RouteId = routeId,
                 Timestamp = model.Date.ToDateTime(model.Time),
             };
             try
@@ -322,6 +336,20 @@ public class EntryController : Controller
     {
         if (ModelState.IsValid)
         {
+            int routeId;
+            try
+            {
+                routeId = (await _loopRepository.Get(model.LoopId)).Routes.Where(r => r.StopId == model.StopId).First().Id;
+            }
+            catch
+            {
+                ModelState.AddModelError(string.Empty, "The stop selected must be part of the loop.");
+                ViewBag.AvailableLoops = await GetAvailableLoops();
+                ViewBag.AvailableBusses = await GetAvailableBusses();
+                ViewBag.AvailableStops = await GetAvailableStops();
+                ViewBag.AvailableDrivers = await GetAvailableDrivers();
+                return View(model);
+            }
             var entry = new Entry
             {
                 Id = model.Id,
@@ -330,6 +358,7 @@ public class EntryController : Controller
                 BusId = model.BusId,
                 StopId = model.StopId,
                 LoopId = model.LoopId,
+                RouteId = routeId,
                 Timestamp = model.Date.ToDateTime(model.Time),
             };
             try

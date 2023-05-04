@@ -9,7 +9,12 @@ namespace Core
         private static bool _created = false;
         public ShuttleDbContext(DbContextOptions<ShuttleDbContext> options) : base(options)
         {
-            
+            if (!_created)
+            {
+                _created = true;
+                Database.EnsureDeleted();
+                Database.EnsureCreated();
+            }
         }
         public DbSet<Entry> Entries { get; set; }
         public DbSet<Driver> Drivers { get; set; }
