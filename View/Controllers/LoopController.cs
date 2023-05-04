@@ -58,14 +58,18 @@ public class LoopController : Controller
                 stopsForMap = new List<Stop>();
             } else
             {
-                var stopsWithManyPeople = entries.OrderByDescending(e => e.Boarded).Select(e => e.Stop).Take(5).ToList();
-                stopsForMap = stopsWithManyPeople.Join(stopsForMap, s => s.Id, s2 => s2.Id, (s, s2) => s).ToList();
+                var stopsWithManyPeople = entries.OrderByDescending(e => e.Boarded).Select(e => e.StopId).Take(5).ToList();
+                _logger.LogInformation("Size of stops to filter {time}.", stopsWithManyPeople.Count);
+                var stopsToGoThrough = new List<Stop>();
+                foreach(var stop in stopsForMap)
+                {
+                    if (stopsWithManyPeople.Contains(stop.Id))
+                    {
+                        stopsToGoThrough.Add(stop);
+                    }
+                }
+                stopsForMap = stopsToGoThrough;
             }
-            var loopToFilterTo = loops.Where(l => l.Id == int.Parse(loopId)).First();
-
-            stopsForMap = loopToFilterTo.Routes.Select(r => r.Stop).ToList();
-
-            loopSelectList.Where(l => l.Value == loopId).First().Selected = true;
         }
 
         ViewBag.StopsForMap = stopsForMap;

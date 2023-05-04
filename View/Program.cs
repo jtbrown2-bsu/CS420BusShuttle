@@ -7,9 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var folder = Environment.SpecialFolder.LocalApplicationData;
+var path = Environment.GetFolderPath(folder);
+var DbPath = Path.Join(path, "shuttle.db");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseInMemoryDatabase("CS420Bus"));
+//builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseInMemoryDatabase("CS420Bus"));
+builder.Services.AddDbContext<ShuttleDbContext>(options => options.UseSqlite($"Data Source={DbPath}"));
 builder.Services.AddScoped<IBusRepository, BusRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 builder.Services.AddScoped<IEntryRepository, EntryRepository>();

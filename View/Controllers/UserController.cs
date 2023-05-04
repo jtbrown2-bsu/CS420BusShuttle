@@ -86,6 +86,7 @@ namespace View.Controllers
                     if (user.IsManager)
                     {
                         await _userManager.AddClaimAsync(user, new Claim("IsManager", "true"));
+                        await _userManager.AddClaimAsync(user, new Claim("IsActivated", "true"));
                         _logger.LogInformation("Manager with email {email} created at {time}.", model.Email, DateTime.Now);
                     } else
                     {
@@ -116,10 +117,15 @@ namespace View.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if(user == null)
             {
+                _logger.LogError("Finding user id {id} for activation failed at {time}.", id, DateTime.Now);
+                throw new Exception("No user found.");
+            }
+            var activatedUser = await _userManager.AddClaimAsync(user, new Claim("IsActivated", "true"));
+            if(!activatedUser.Succeeded)
+            {
                 _logger.LogError("Activating user id {id} failed at {time}.", id, DateTime.Now);
                 throw new Exception("No user found.");
             }
-            await _userManager.AddClaimAsync(user, new Claim("IsActivated", "true"));
             user.IsActivated = true;
             await _userManager.UpdateAsync(user);
             _logger.LogInformation("Activating user id {id} succeeded at {time}.", id, DateTime.Now);

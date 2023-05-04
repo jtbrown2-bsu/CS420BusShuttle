@@ -52,15 +52,15 @@
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Entry" asp-action="Index">Entry</a>
                                     </li>
                                 }
-                                <li>
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Log Out</a>
-                                </li>
-                                if(isActivated && !isManager)
+                                if (isActivated && !isManager)
                                 {
                                     <li>
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Entry" asp-action="StartDriving">Start Driving</a>
                                     </li>
                                 }
+                                <li>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Log Out</a>
+                                </li>
                             }
                             else
                             {

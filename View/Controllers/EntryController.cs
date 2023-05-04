@@ -224,11 +224,11 @@ public class EntryController : Controller
             try
             {
                 await _entryRepository.Add(entry);
-                _logger.LogInformation("Entry {id} created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                _logger.LogInformation("Entry created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.DriverId, entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
             }
             catch
             {
-                _logger.LogError("Entry failed creation by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                _logger.LogError("Entry failed created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.DriverId, entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
                 return NotFound();
             }
             return Ok();
@@ -272,11 +272,11 @@ public class EntryController : Controller
             try
             {
                 await _entryRepository.Add(entry);
-                _logger.LogInformation("Entry {id} created by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                _logger.LogInformation("Entry created for loop {loop} for stop {stop} on bus {bus} at {time}.", entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
             }
             catch
             {
-                _logger.LogError("Entry failed creation by {driver} on loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, DateTime.Now);
+                _logger.LogError("Entry failed creation for loop {loop} for stop {stop} on bus {bus} at {time}.", entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
                 return NotFound();
             }
             return RedirectToAction("Index");
@@ -335,11 +335,11 @@ public class EntryController : Controller
             try
             {
                 await _entryRepository.Update(entry);
-                _logger.LogInformation("Entry {id} updated to have driver {driver} on loop {loop} for stop {stop} on bus {bus} at timestamp {time} at time {timenow}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, entry.Timestamp, DateTime.Now);
+                _logger.LogInformation("Entry {id} updated for loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
             }
             catch
             {
-                _logger.LogError("Entry {id} failed to update to have driver {driver} on loop {loop} for stop {stop} on bus {bus} at timestamp {time} at time {timenow}.", entry.Id, entry.Driver.FirstName + " " + entry.Driver.LastName, entry.Loop.Name, entry.Stop.Id, entry.Bus.BusNumber, entry.Timestamp, DateTime.Now);
+                _logger.LogError("Entry {id} failed creation for loop {loop} for stop {stop} on bus {bus} at {time}.", entry.Id, entry.LoopId, entry.StopId, entry.BusId, DateTime.Now);
                 return NotFound();
             }
             return RedirectToAction("Index");
