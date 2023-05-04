@@ -1,14 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Core
 {
     public class ShuttleDbContext : IdentityDbContext<Driver>
     {
-        public ShuttleDbContext()
+        protected readonly IConfiguration Configuration;
+        public ShuttleDbContext(IConfiguration configuration)
         {
-
+            Configuration = configuration;
         }
         public DbSet<Entry> Entries { get; set; }
         public DbSet<Driver> Drivers { get; set; }
@@ -32,9 +34,7 @@ namespace Core
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseInMemoryDatabase(databaseName: "MyDatabase")
-                .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+            optionsBuilder.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }

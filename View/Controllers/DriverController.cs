@@ -23,11 +23,6 @@ public class DriverController : Controller
         return View(drivers);
     }
 
-    public IActionResult Create()
-    {
-        return View();
-    }
-
     public async Task<IActionResult> Edit(string id)
     {
         var model = await _driverRepository.Get(id);
