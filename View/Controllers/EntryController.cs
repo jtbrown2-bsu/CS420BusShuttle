@@ -16,10 +16,10 @@ public class EntryController : Controller
     private readonly IStopRepository _stopRepository;
     private readonly IBusRepository _busRepository;
     private readonly ILoopRepository _loopRepository;
-    private readonly ILogger<BusController> _logger;
+    private readonly ILogger<EntryController> _logger;
     private readonly UserManager<Driver> _userManager;
 
-    public EntryController(IEntryRepository entryRepository, IStopRepository stopRepository, UserManager<Driver> userManager, IBusRepository busRepository, ILoopRepository loopRepository, ILogger<BusController> logger)
+    public EntryController(IEntryRepository entryRepository, IStopRepository stopRepository, UserManager<Driver> userManager, IBusRepository busRepository, ILoopRepository loopRepository, ILogger<EntryController> logger)
     {
         _entryRepository = entryRepository;
         _stopRepository = stopRepository;

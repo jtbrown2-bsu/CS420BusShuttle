@@ -8,9 +8,9 @@ namespace View.Controllers;
 public class StopController : Controller
 {
     private readonly IStopRepository _stopRepository;
-    private readonly ILogger<BusController> _logger;
+    private readonly ILogger<StopController> _logger;
 
-    public StopController(IStopRepository stopRepository, ILogger<BusController> logger)
+    public StopController(IStopRepository stopRepository, ILogger<StopController> logger)
     {
         _stopRepository = stopRepository;
         _logger = logger;

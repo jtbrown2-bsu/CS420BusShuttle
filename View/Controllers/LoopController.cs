@@ -12,9 +12,9 @@ public class LoopController : Controller
     private readonly ILoopRepository _loopRepository;
     private readonly IStopRepository _stopRepository;
     private readonly IEntryRepository _entryRepository;
-    private readonly ILogger<BusController> _logger;
+    private readonly ILogger<LoopController> _logger;
 
-    public LoopController(ILoopRepository loopRepository, IStopRepository stopRepository, IEntryRepository entryRepository, ILogger<BusController> logger)
+    public LoopController(ILoopRepository loopRepository, IStopRepository stopRepository, IEntryRepository entryRepository, ILogger<LoopController> logger)
     {
         _loopRepository = loopRepository;
         _stopRepository = stopRepository;

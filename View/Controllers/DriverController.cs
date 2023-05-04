@@ -9,9 +9,9 @@ namespace View.Controllers;
 public class DriverController : Controller
 {
     private readonly IDriverRepository _driverRepository;
-    private readonly ILogger<BusController> _logger;
+    private readonly ILogger<DriverController> _logger;
 
-    public DriverController(IDriverRepository driverRepository, ILogger<BusController> logger)
+    public DriverController(IDriverRepository driverRepository, ILogger<DriverController> logger)
     {
         _driverRepository = driverRepository;
         _logger = logger;

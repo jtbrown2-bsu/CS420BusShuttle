@@ -14,9 +14,9 @@ public class RouteController : Controller
     private readonly IRouteRepository _routeRepository;
     private readonly IStopRepository _stopRepository;
     private readonly ILoopRepository _loopRepository;
-    private readonly ILogger<BusController> _logger;
+    private readonly ILogger<RouteController> _logger;
 
-    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository, ILoopRepository loopRepository, ILogger<BusController> logger)
+    public RouteController(IRouteRepository routeRepository, IStopRepository stopRepository, ILoopRepository loopRepository, ILogger<RouteController> logger)
     {
         _routeRepository = routeRepository;
         _stopRepository = stopRepository;

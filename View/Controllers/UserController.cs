@@ -11,9 +11,9 @@ namespace View.Controllers
     {
         private readonly UserManager<Driver> _userManager;
         private readonly SignInManager<Driver> _signInManager;
-        private readonly ILogger<BusController> _logger;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserManager<Driver> userManager, SignInManager<Driver> signInManager, ILogger<BusController> logger)
+        public UserController(UserManager<Driver> userManager, SignInManager<Driver> signInManager, ILogger<UserController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -92,7 +92,7 @@ namespace View.Controllers
                         _logger.LogInformation("Non-manager with email {email} created at {time}.", model.Email, DateTime.Now);
                     }
 
-                    await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
+                    await _signInManager.SignInAsync(user, model.RememberMe);
 
                     return RedirectToAction("Index", "Home");
                 }
